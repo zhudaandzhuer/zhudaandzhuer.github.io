@@ -1,22 +1,232 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <link rel="icon" type="image/png" sizes="256x256" href="./images/zhuda-zhuer-favicon-256.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180.png">
-    <title>豬大與豬二世界大廳</title>
-  <script type="module" crossorigin src="./assets/lobby-Bdpt4cLi.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/game-i18n-BStjKk4Y.js">
-  <link rel="modulepreload" crossorigin href="./assets/shared-DnP4b5qf.js">
-  <link rel="modulepreload" crossorigin href="./assets/game-content-CCpXm5Wm.js">
-  <link rel="stylesheet" crossorigin href="./assets/shared-QclqselB.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelWorld 作品展示（單機版）</title>
+  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  <link rel="icon" type="image/png" sizes="256x256" href="./images/zhuda-zhuer-favicon-256.png" />
+  <style>
+    :root {
+      --bg1: #0f1221;
+      --bg2: #1d2740;
+      --paper: rgba(20, 28, 46, 0.9);
+      --text: #e9f1ff;
+      --muted: #a9b9d7;
+      --line: rgba(196, 213, 255, 0.18);
+      --accent: #6ec8ff;
+      --shadow: 0 18px 45px rgba(0, 8, 28, 0.45);
+      --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      font-family: var(--font);
+      background:
+        radial-gradient(80% 80% at 15% 20%, rgba(110, 200, 255, 0.15), transparent 50%),
+        radial-gradient(60% 60% at 85% 80%, rgba(148, 100, 255, 0.18), transparent 40%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 26px;
+    }
+
+    .panel {
+      width: min(980px, 100%);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 34px);
+      backdrop-filter: blur(5px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.08), transparent 45%);
+      opacity: 0.55;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: #c8d8f7;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.12;
+      letter-spacing: 0.01em;
+    }
+
+    p {
+      margin: 8px 0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 68ch;
+    }
+
+    .meta {
+      margin: 18px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(4, 8, 21, 0.35);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 22px 0 14px;
+    }
+
+    a.btn {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    a.btn:hover,
+    a.btn:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #6ec8ff, #4b9ef6);
+      color: #03203a;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .preview {
+      border: 1px solid var(--line);
+      margin-top: 18px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #050910;
+      position: relative;
+    }
+
+    .preview img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+
+    .caption {
+      padding: 12px;
+      color: #ccdef3;
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+      background: rgba(8, 14, 32, 0.72);
+    }
+
+    .tip {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #c3cfeb;
+      padding: 10px 12px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: rgba(14, 22, 40, 0.55);
+    }
+
+    @media (max-width: 680px) {
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
-<body class="portal-body">
-    <div id="app"></div>
+<body>
+  <main class="panel">
+    <section class="content">
+      <div class="badge">PixelWorld · 作品展示（單機版）</div>
+      <h1>豬大與豬二世界｜作品前端展示</h1>
+      <p>
+        這是為 GitHub Pages 設計的 <strong>單機展示入口</strong>，主要用來直接展示前端整體介面與資源組件。若需多人真實流程，請切到「進入多人原版」，會導向原始前端頁面。
+      </p>
+      <div class="meta">
+        <span class="pill">TypeScript + WebSocket 串接</span>
+        <span class="pill">LayaAir / Canvas 場景渲染</span>
+        <span class="pill">獨立前端資源可直接放到 GitHub Pages</span>
+      </div>
+
+      <div class="actions">
+        <a class="btn btn-primary" href="#" id="launchDemo">開啟單機介紹面板</a>
+        <a class="btn btn-ghost" href="lobby-online.html">進入多人原版（需後端）</a>
+        <a class="btn btn-ghost" href="game.html?room=public-survival&language=tw">直接測試遊戲頁（原版載入）</a>
+      </div>
+
+      <div class="preview">
+        <img src="./images/zhuda-loading.webp" alt="PixelWorld 封面預覽" />
+        <div class="caption">預覽圖為前端載入畫面資源，點選下方「進入多人原版（需後端）」可直接開啟原版入口。</div>
+      </div>
+
+      <div class="tip">
+        建議你上傳前先確認 <code>myGames/0001-PixelWorld/lobby-online.html</code> 保持原樣；若之後要加完整的前端互動 Demo，我可以再補上「純前端假 API」版本。
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const demoBtn = document.getElementById("launchDemo");
+    demoBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      alert("這個單機展示版目前提供作品預覽與進入點。若你想，我可以再幫你改成『點擊卡片後切到可操作的小遊戲 UI』版。");
+    });
+  </script>
 </body>
 </html>
