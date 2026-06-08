@@ -1,311 +1,836 @@
 <!doctype html>
-<html lang="zh-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>趙敬瑋 履歷 | Resume</title>
-    <meta
-      name="description"
-      content="趙敬瑋的個人履歷 - 前端遊戲開發（Egret / Unity / LayaAir / TypeScript）"
-    />
-    <style>
-      :root {
-        --bg: #0b1020;
-        --panel: #121a33;
-        --text: #e9eef9;
-        --muted: #a9b4d0;
-        --accent: #6ec1ff;
-        --line: #2a3560;
-        --tag: #1f2a50;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
-        background: radial-gradient(circle at top, #172246 0%, var(--bg) 45%);
-        color: var(--text);
-        line-height: 1.65;
-      }
-      .resume {
-        max-width: 900px;
-        margin: 28px auto;
-        padding: 22px;
-        background: rgba(15, 22, 45, 0.86);
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-      }
-      .header {
-        display: flex;
-        gap: 16px;
-        justify-content: space-between;
-        align-items: flex-start;
-        border-bottom: 1px dashed var(--line);
-        padding-bottom: 16px;
-      }
-      .name {
-        font-size: 2rem;
-        margin: 0;
-        letter-spacing: 0.5px;
-      }
-      .subtitle {
-        margin: 8px 0 0;
-        color: var(--muted);
-      }
-      .contact {
-        text-align: right;
-      }
-      .contact a {
-        display: block;
-        color: var(--accent);
-        text-decoration: none;
-      }
-      .section {
-        margin-top: 22px;
-      }
-      .section-title {
-        font-size: 1.1rem;
-        color: var(--accent);
-        border-left: 4px solid var(--accent);
-        padding-left: 10px;
-        margin-bottom: 10px;
-      }
-      .card {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 14px;
-        margin: 10px 0;
-      }
-      .tagline {
-        color: #d4defb;
-        margin: 0;
-      }
-      .meta {
-        color: var(--muted);
-        margin: 2px 0 0;
-      }
-      ul {
-        margin: 8px 0 0;
-        padding-left: 20px;
-      }
-      li {
-        margin: 6px 0;
-      }
-      .pill {
-        display: inline-block;
-        padding: 3px 10px;
-        margin: 3px 6px 0 0;
-        background: var(--tag);
-        border-radius: 999px;
-        font-size: 0.86rem;
-        color: #d8e5ff;
-      }
-      .jobs {
-        display: grid;
-        gap: 12px;
-      }
-      .job-header {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .job-title {
-        font-weight: 700;
-      }
-      .job-time {
-        color: var(--muted);
-        white-space: nowrap;
-      }
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>趙敬瑋 履歷 | Resume</title>
+  <meta
+    name="description"
+    content="趙敬瑋的個人履歷，前端遊戲開發（LayaAir、Unity、TypeScript）"
+  />
+  <style>
+    :root {
+      --ink: #25313a;
+      --muted: #6d7982;
+      --line: #9aa6ad;
+      --navy: #173a53;
+      --navy-2: #214b67;
+      --paper: #ffffff;
+      --canvas: #eef1f4;
+      --accent: #2f637f;
+      --sidebar-text: #f4f7f9;
+      --sidebar-soft: #c9d6df;
+      --shadow: 0 18px 45px rgba(22, 39, 54, .16);
+      --radius: 14px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, "Noto Sans TC", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--font);
+      line-height: 1.45;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      text-underline-offset: 3px;
+    }
+
+    a:hover,
+    a:focus-visible {
+      text-decoration: underline;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(238, 241, 244, .86);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(23, 58, 83, .12);
+    }
+
+    .toolbar button {
+      border: 1px solid rgba(23, 58, 83, .24);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font: 700 13px/1 var(--font);
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(22, 39, 54, .08);
+    }
+
+    .toolbar button:hover,
+    .toolbar button:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .toolbar .primary {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+
+    .sheet {
+      width: min(100%, 1000px);
+      margin: 28px auto 60px;
+      padding: 0 18px;
+    }
+
+    .resume {
+      width: 100%;
+      min-height: 1180px;
+      display: grid;
+      grid-template-columns: 33% 67%;
+      background: var(--paper);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, var(--navy), #14344b 68%, #102e43);
+      color: var(--sidebar-text);
+      padding: 48px 44px 44px;
+    }
+
+    .main {
+      padding: 74px 56px 48px;
+      background: #fff;
+    }
+
+    .avatar {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 48px;
+      border-radius: 50%;
+      padding: 7px;
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+    }
+
+    .avatar svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+      background: #d7dfe5;
+    }
+
+    .section {
+      margin: 0 0 34px;
+    }
+
+    .main .section {
+      margin-bottom: 38px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .sidebar .section-title {
+      color: #fff;
+      padding-bottom: 11px;
+      border-bottom: 2px solid rgba(255,255,255,.34);
+      font-size: 18px;
+    }
+
+    .main .section-title {
+      color: var(--ink);
+      padding-bottom: 9px;
+      border-bottom: 3px solid var(--line);
+    }
+
+    .hero {
+      margin-bottom: 66px;
+    }
+
+    .name {
+      margin: 0;
+      font-size: clamp(37px, 5vw, 54px);
+      line-height: .98;
+      letter-spacing: .015em;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .name span {
+      font-weight: 350;
+    }
+
+    .role {
+      width: fit-content;
+      margin: 11px 0 0;
+      padding-bottom: 12px;
+      border-bottom: 4px solid var(--accent);
+      color: var(--muted);
+      font-size: 19px;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+      font-weight: 650;
+    }
+
+    .contact-list,
+    .plain-list,
+    .bullet-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .contact-list li { margin: 11px 0; }
+
+    .contact-link {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: var(--sidebar-text);
+      font-size: 13.5px;
+      word-break: break-word;
+    }
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-top: -1px;
+      border-radius: 50%;
+      color: var(--navy);
+      background: rgba(255,255,255,.86);
+      font-size: 11px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .edu-item { margin: 0 0 23px; }
+
+    .years {
+      display: block;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: .05em;
+    }
+
+    .school {
+      margin: 4px 0 3px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .small-bullets {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--sidebar-soft);
+      font-size: 13.5px;
+    }
+
+    .small-bullets li { margin: 4px 0; }
+
+    .plain-list li {
+      position: relative;
+      margin: 8px 0;
+      padding-left: 18px;
+      color: var(--sidebar-soft);
+      font-size: 13.5px;
+    }
+
+    .plain-list li::before,
+    .small-bullets li::marker {
+      color: #fff;
+    }
+
+    .plain-list li::before {
+      content: "";
+      position: absolute;
+      top: .68em;
+      left: 2px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .profile-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14.7px;
+      text-align: justify;
+    }
+
+    .timeline {
+      position: relative;
+      margin: 0;
+      padding: 0 0 0 33px;
+      list-style: none;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 7px;
+      bottom: 7px;
+      left: 5px;
+      width: 2px;
+      background: var(--line);
+    }
+
+    .job {
+      position: relative;
+      margin: 0 0 28px;
+      padding-left: 0;
+    }
+
+    .job::before {
+      content: "";
+      position: absolute;
+      top: 7px;
+      left: -34px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ink);
+      box-shadow: 0 0 0 4px #fff;
+    }
+
+    .job-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+
+    .company {
+      display: block;
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 16px;
+    }
+
+    .job-title {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .bullet-list {
+      margin: 0;
+      padding-left: 18px;
+      list-style: disc;
+      color: var(--muted);
+      font-size: 13.8px;
+    }
+
+    .bullet-list li { margin: 6px 0; }
+
+    .references {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 34px;
+    }
+
+    .reference-card h3 {
+      margin: 0 0 4px;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .reference-card .position {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .reference-card p {
+      margin: 3px 0;
+      color: var(--muted);
+      font-size: 12.7px;
+    }
+
+    .reference-card strong {
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    [data-edit="true"][contenteditable="true"] {
+      outline: 1.5px dashed rgba(47, 99, 127, .55);
+      outline-offset: 3px;
+      border-radius: 4px;
+      background: rgba(47, 99, 127, .06);
+    }
+
+    .editing-tip {
+      display: none;
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 11;
+      max-width: 320px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      border: 1px solid rgba(23, 58, 83, .16);
+    }
+
+    body.is-editing .editing-tip { display: block; }
+
+    @media (max-width: 800px) {
       .toolbar {
-        margin-top: 18px;
-        display: flex;
-        gap: 10px;
         flex-wrap: wrap;
       }
-      .toolbar a {
-        display: inline-block;
-        padding: 8px 12px;
-        background: var(--accent);
-        color: #081022;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 700;
+
+      .sheet {
+        margin-top: 14px;
+        padding: 0;
       }
-      .toolbar span {
-        opacity: 0.7;
-        color: var(--muted);
-        line-height: 38px;
+
+      .resume {
+        grid-template-columns: 1fr;
+        border-radius: 0;
       }
-      @media (max-width: 700px) {
-        .header {
-          flex-direction: column;
-        }
-        .contact {
-          text-align: left;
-        }
-        .resume {
-          margin: 10px;
-          padding: 16px;
-        }
+
+      .sidebar,
+      .main {
+        padding: 34px 28px;
       }
-      @media print {
-        body {
-          background: white;
-          color: #111;
-        }
-        .resume {
-          border: none;
-          box-shadow: none;
-          background: white;
-        }
-        .card,
-        .section-title,
-        .pill,
-        .toolbar {
-          background: #fff;
-          color: #111;
-          border-color: #ddd;
-        }
+
+      .avatar {
+        width: 126px;
+        height: 126px;
+        margin-bottom: 28px;
       }
-    </style>
-  </head>
-  <body>
-    <main class="resume">
-      <header class="header">
-        <div>
-          <h1 class="name">趙敬瑋</h1>
-          <p class="subtitle">前端遊戲客戶端工程師 / Frontend Game Client Engineer</p>
-          <p class="meta">
-            專長：TypeScript、LayaAir 3.3.x、FairyGUI、Unity、Lua、Egret，5 年遊戲開發與架構整合經驗
-          </p>
+
+      .hero { margin-bottom: 38px; }
+
+      .job-head {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .date { white-space: normal; }
+
+      .references {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    @media print {
+      html,
+      body {
+        width: 210mm;
+        min-height: 297mm;
+        background: #fff;
+      }
+
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .toolbar,
+      .editing-tip {
+        display: none !important;
+      }
+
+      .sheet {
+        width: 210mm;
+        margin: 0;
+        padding: 0;
+      }
+
+      .resume {
+        min-height: 297mm;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .sidebar {
+        padding: 39px 34px 34px;
+      }
+
+      .main {
+        padding: 61px 42px 38px;
+      }
+
+      .avatar {
+        width: 132px;
+        height: 132px;
+        margin-bottom: 34px;
+      }
+
+      .name { font-size: 40px; }
+      .role { font-size: 15px; }
+      .section-title { font-size: 16px; }
+      .sidebar .section-title { font-size: 15px; }
+      .profile-text, .bullet-list { font-size: 12px; }
+      .contact-link, .plain-list li, .small-bullets { font-size: 11.5px; }
+      .job { margin-bottom: 19px; }
+
+      a { text-decoration: none !important; }
+      [contenteditable="true"] { outline: none !important; background: transparent !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar" aria-label="Resume actions">
+    <button type="button" class="primary" id="editToggle">開啟編輯模式</button>
+    <button type="button" id="downloadHtml">下載目前版本 HTML</button>
+    <button type="button" id="printPdf">列印 / 另存 PDF</button>
+    <button type="button" id="resetResume">還原範例內容</button>
+  </div>
+
+  <main class="sheet">
+    <article class="resume" id="resume" itemscope itemtype="https://schema.org/Person">
+      <aside class="sidebar" aria-label="Sidebar resume information">
+        <div class="avatar" aria-label="Profile photo placeholder">
+          <svg viewBox="0 0 200 200" role="img" aria-labelledby="avatarTitle avatarDesc">
+            <title id="avatarTitle">Profile photo placeholder</title>
+            <desc id="avatarDesc">Replace this SVG with your own photo if needed.</desc>
+            <defs>
+              <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#e5edf2" />
+                <stop offset="1" stop-color="#b5c5d1" />
+              </linearGradient>
+              <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#163a53" />
+                <stop offset="1" stop-color="#2f637f" />
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="100" fill="url(#bg)" />
+            <circle cx="100" cy="82" r="38" fill="#d5a37b" />
+            <path d="M61 77c9-36 64-42 77-9 6 16-4 25-4 25-4-19-22-27-40-28-16-1-28 6-33 12z" fill="#2c2c2c" />
+            <path d="M43 174c8-41 31-61 57-61s49 20 57 61" fill="url(#shirt)" />
+            <path d="M78 116c6 14 38 14 44 0 0 22-44 22-44 0z" fill="#fff" opacity=".82" />
+            <path d="M82 91c7 10 28 10 36 0" fill="none" stroke="#6f3c28" stroke-width="5" stroke-linecap="round" />
+          </svg>
         </div>
-        <div class="contact">
-          <a href="mailto:cs.chaochingwei@gmail.com">Email: cs.chaochingwei@gmail.com</a>
-          <a href="https://github.com/zhudaandzhuer">GitHub: zhudaandzhuer</a>
-          <a href="https://www.linkedin.com/in/%E6%95%AC%E7%91%8B-%E8%B6%99-7991b7415/">
-            LinkedIn: 趙敬瑋
-          </a>
-        </div>
-      </header>
 
-      <section class="section">
-        <div class="section-title">個人簡介</div>
-        <div class="card">
-          <p class="tagline">
-            前端遊戲工程師，具備 5 年開發經驗，專長於現有專案維運、架構遷移與流程優化。
-            先後參與 Egret 舊專案維護，之後加入 Unity 團隊負責 Unity + Lua 開發（含遊戲大廳與黑傑克遊戲），
-            再回到 H5 使用 Egret 開發小遊戲，後續執行 Egret 到 Laya 的全面搬移。
-            目前持續架設 AI Agent，完善工作流程，提升開發效率與專注力，並用更全面的角度進行遊戲審視與品質控管。
-          </p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">核心技能</div>
-        <div class="card">
-          <div>
-            <span class="pill">TypeScript</span>
-            <span class="pill">JavaScript</span>
-            <span class="pill">LayaAir 3.3.x</span>
-            <span class="pill">FairyGUI</span>
-            <span class="pill">Photon WebSocket</span>
-            <span class="pill">Unity</span>
-            <span class="pill">Lua</span>
-            <span class="pill">Egret</span>
-            <span class="pill">UI Contract / Signal</span>
-            <span class="pill">Node.js</span>
-            <span class="pill">Playwright</span>
-            <span class="pill">Git</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">專案經歷</div>
-        <div class="jobs">
-          <div class="card">
-            <div class="job-header">
-              <div class="job-title">BDL LayaAirClient 多遊戲客戶端（核心專案）</div>
-              <div class="job-time">約 5 年</div>
-            </div>
-            <p class="meta">技術棧：LayaAir 3.3.11、TypeScript、FairyGUI、Photon、Node.js</p>
-            <ul>
-              <li>負責主啟動與分包載入流程（app 設定、資源版本、分包核心/皮膚/伺服器 ID 映射）。</li>
-              <li>維護共用流程骨架：Startup、GameCommon、GameCustom 三層分工，降低不同遊戲間重複代碼。</li>
-              <li>建立與維護 Signal 狀態中心，搭配 listener 清理機制，提升 runtime 生命周期穩定性。</li>
-              <li>實作與協作 layout/viewport 相容邏輯，改善行動裝置方向切換與畫面穩定度。</li>
-              <li>導入資源清理與重啟安全流程，降低場景切換與重複進入時的殘留風險。</li>
-              <li>配合 smoke 測試、api test 與 log server，提升問題重現與回歸效率。</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <div class="job-header">
-              <div class="job-title">推筒子 / 象棋麻將整合與 Laya-first 遊戲接軌</div>
-              <div class="job-time">進行中</div>
-            </div>
-            <p class="meta">技術棧：LayaAir 3.3.x、TypeScript、FairyGUI</p>
-            <ul>
-              <li>參與 Laya-first 遊戲接入共用殼流程，保留既有登入、進房、資源版本、桌況流程一致性。</li>
-              <li>整合語系與 WebView 導流，提升跨裝置導覽一致性與用戶體驗。</li>
-              <li>透過資料導向設定降低硬編碼，提升新遊戲接入的擴展性。</li>
-            </ul>
-          </div>
-
-          <div class="card">
-            <div class="job-header">
-              <div class="job-title">AI Agent 工作流程優化專案</div>
-              <div class="job-time">持續進行</div>
-            </div>
-            <p class="meta">技術棧：TypeScript、Node.js、Playwright</p>
-            <ul>
-              <li>建立 AI 輔助任務流程，提升需求澄清、除錯與交付效率。</li>
-              <li>強化工作專注力管理，讓開發可從修 Bug 切換到系統性流程審視。</li>
-              <li>建立可重複運用的檢核模板，縮短多人協作時的溝通成本。</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-title">工作經歷</div>
-        <div class="card">
-          <ul>
-            <li>新人階段：參與 Egret 舊專案維護，負責功能維修與穩定性改善。</li>
-            <li>Unity 團隊：負責 Unity + Lua 專案，開發遊戲大廳與黑傑克玩法。</li>
-            <li>H5階段：回到 H5 使用 Egret 開發小遊戲，累積產品化交付經驗。</li>
-            <li>架構轉型：主導「Egret to Laya」全面搬移，建立新架構整合能力。</li>
-            <li>持續精進：導入 AI Agent，提升開發效率並將審視面向從局部問題轉為全局流程。</li>
+        <section class="section" id="contact">
+          <h2 class="section-title">Contact</h2>
+          <ul class="contact-list">
+            <li>
+              <a class="contact-link" data-link="email" href="mailto:hello@reallygreatsite.com" aria-label="Send email">
+                <span class="icon" aria-hidden="true">✉</span>
+                <span class="link-text" data-edit="true">cs.chaochingwei@gmail.com</span>
+              </a>
+            </li>
+            <li>
+              <a class="contact-link" data-link="web" href="https://github.com/zhudaandzhuer" target="_blank" rel="noopener" aria-label="Open GitHub profile">
+                <span class="icon" aria-hidden="true">⌁</span>
+                <span class="link-text" data-edit="true">github.com/zhudaandzhuer</span>
+              </a>
+            </li>
+            <li>
+              <a class="contact-link" data-link="web" href="https://www.linkedin.com/in/%E6%95%AC%E7%91%8B-%E8%B6%99-7991b7415/" target="_blank" rel="noopener" aria-label="Open LinkedIn profile">
+                <span class="icon" aria-hidden="true">↗</span>
+                <span class="link-text" data-edit="true">LinkedIn | 趙敬瑋</span>
+              </a>
+            </li>
           </ul>
-        </div>
-      </section>
+        </section>
 
-      <section class="section">
-        <div class="section-title">學歷</div>
-        <div class="card">
-          <p>淡江大學｜資工系研究所畢業（2019 ~ 2021）</p>
-        </div>
-      </section>
+        <section class="section" id="education">
+          <h2 class="section-title">Education</h2>
+          <div class="edu-item">
+            <span class="years" data-edit="true">補充中</span>
+            <p class="school" data-edit="true">資訊工程 / 遊戲開發相關背景</p>
+            <ul class="small-bullets">
+              <li data-edit="true">可依你學歷再補齊日期與學校資訊</li>
+            </ul>
+          </div>
+        </section>
 
-      <section class="section">
-        <div class="section-title">English Summary</div>
-        <div class="card">
-          <p class="tagline">
-            Frontend game client engineer with 5 years of experience in game product development and architecture evolution.
-            Experienced in maintaining legacy Egret projects, building Unity + Lua gameplay systems (lobby and blackjack), and migrating from Egret to Laya.
-            Currently designing AI-powered assistants to improve development efficiency, review quality flow from a broader perspective, and strengthen release stability.
+        <section class="section" id="skills">
+          <h2 class="section-title">Skills</h2>
+          <ul class="plain-list">
+            <li data-edit="true">TypeScript / JavaScript</li>
+            <li data-edit="true">LayaAir 3.3.x + FairyGUI</li>
+            <li data-edit="true">Unity + Lua</li>
+            <li data-edit="true">Egret</li>
+            <li data-edit="true">Photon WebSocket</li>
+            <li data-edit="true">Node.js</li>
+            <li data-edit="true">Playwright / API test</li>
+            <li data-edit="true">Git / CI + log tracing</li>
+          </ul>
+        </section>
+
+        <section class="section" id="languages">
+          <h2 class="section-title">Languages</h2>
+          <ul class="plain-list">
+            <li data-edit="true">中文（母語）</li>
+            <li data-edit="true">English（閱讀/溝通）</li>
+          </ul>
+        </section>
+      </aside>
+
+      <section class="main" aria-label="Main resume content">
+        <header class="hero">
+          <h1 class="name" itemprop="name"><span data-edit="true">趙</span> <span data-edit="true">敬瑋</span></h1>
+          <p class="role" itemprop="jobTitle" data-edit="true">前端遊戲客戶端工程師 / Frontend Game Client Engineer</p>
+        </header>
+
+        <section class="section" id="profile">
+          <h2 class="section-title">Profile</h2>
+          <p class="profile-text" itemprop="description" data-edit="true">
+            前端遊戲工程師，具備 5 年開發經驗，專長於現有專案維運、架構遷移與流程優化。曾參與 Egret 與 Unity 專案維護與重構，並主導
+            Egret 到 Laya 的全面搬移，近年持續以 AI Agent 提升團隊開發效率與品質控管。
           </p>
-        </div>
-      </section>
+        </section>
 
-      <div class="toolbar">
-        <a href="#">下載 PDF（可用瀏覽器列印為 PDF）</a>
-        <span>下一步：若要我幫你改成 1 頁精簡版 + ATS 友善版，我可以直接再整理。</span>
-      </div>
-    </main>
-  </body>
+        <section class="section" id="work-experience">
+          <h2 class="section-title">Work Experience</h2>
+          <ol class="timeline">
+            <li class="job" itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">
+              <div class="job-head">
+                <div>
+                  <span class="company" itemprop="name" data-edit="true">BDL LayaAirClient（核心專案）</span>
+                  <span class="job-title" data-edit="true">Frontend Game Client Engineer</span>
+                </div>
+                <span class="date" data-edit="true">約 5 年</span>
+              </div>
+              <ul class="bullet-list">
+                <li data-edit="true">負責主啟動與分包載入流程（app 設定、資源版本、分包核心與皮膚映射）。</li>
+                <li data-edit="true">維護 Startup / GameCommon / GameCustom 三層骨架，降低不同遊戲共用代碼重複率。</li>
+                <li data-edit="true">導入 Signal 狀態中心與 listener 清理機制，提升 runtime 穩定度。</li>
+                <li data-edit="true">配合 smoke test / api test、log system 做重現與回歸追蹤。</li>
+              </ul>
+            </li>
+
+            <li class="job" itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">
+              <div class="job-head">
+                <div>
+                  <span class="company" itemprop="name" data-edit="true">Laya-first 遊戲接軌計畫（推筒子 / 象棋麻將）</span>
+                  <span class="job-title" data-edit="true">Frontend Game Client Engineer</span>
+                </div>
+                <span class="date" data-edit="true">進行中</span>
+              </div>
+              <ul class="bullet-list">
+                <li data-edit="true">保留既有登入、進房、資源版本、桌況流程一致性，降低新遊戲接入風險。</li>
+                <li data-edit="true">建立共用設定與資料導向流程，降低硬編碼，提升新遊戲擴充性。</li>
+                <li data-edit="true">整合語系與導流邏輯，優化跨裝置導覽與 WebView 體驗。</li>
+              </ul>
+            </li>
+
+            <li class="job" itemprop="worksFor" itemscope itemtype="https://schema.org/Organization">
+              <div class="job-head">
+                <div>
+                  <span class="company" itemprop="name" data-edit="true">AI Agent 工作流程優化</span>
+                  <span class="job-title" data-edit="true">AI Workflow Planner</span>
+                </div>
+                <span class="date" data-edit="true">持續進行</span>
+              </div>
+              <ul class="bullet-list">
+                <li data-edit="true">規劃以 Playwright + LLM 的自動化測試與知識流，減少重複人工流程。</li>
+                <li data-edit="true">提升開發專注力與缺陷追蹤效率，建立更一致的交付節奏。</li>
+              </ul>
+            </li>
+          </ol>
+        </section>
+
+        <section class="section" id="references">
+          <h2 class="section-title">Portfolio & Links</h2>
+          <div class="references">
+            <div class="reference-card">
+              <h3 data-edit="true">GitHub</h3>
+              <div class="position" data-edit="true">專案與程式碼彙整</div>
+              <p><strong>Link</strong>：<a data-link="web" href="https://github.com/zhudaandzhuer"><span class="link-text" data-edit="true">github.com/zhudaandzhuer</span></a></p>
+            </div>
+            <div class="reference-card">
+              <h3 data-edit="true">LinkedIn</h3>
+              <div class="position" data-edit="true">專業網路頁</div>
+              <p><strong>Link</strong>：<a data-link="web" href="https://www.linkedin.com/in/%E6%95%AC%E7%91%8B-%E8%B6%99-7991b7415/"><span class="link-text" data-edit="true">linkedin.com/in/敬瑋-7991b7415</span></a></p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </article>
+  </main>
+
+  <div class="editing-tip" role="status" aria-live="polite">
+    編輯模式已開啟：可直接點文字修改。電話、Email、地址、網站文字變更後，連結會自動同步；完成後可下載目前版本或列印成 PDF。
+  </div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "single-file-resume-template-current";
+      const resume = document.getElementById("resume");
+      const editToggle = document.getElementById("editToggle");
+      const downloadHtml = document.getElementById("downloadHtml");
+      const printPdf = document.getElementById("printPdf");
+      const resetResume = document.getElementById("resetResume");
+      const originalResumeHtml = resume.innerHTML;
+      let isEditing = false;
+      let saveTimer = null;
+
+      function safeStorageGet(key) {
+        try { return localStorage.getItem(key); } catch (error) { return null; }
+      }
+
+      function safeStorageSet(key, value) {
+        try { localStorage.setItem(key, value); } catch (error) { /* local file storage may be blocked */ }
+      }
+
+      function safeStorageRemove(key) {
+        try { localStorage.removeItem(key); } catch (error) { /* local file storage may be blocked */ }
+      }
+
+      function getEditableText(link) {
+        const node = link.querySelector(".link-text") || link;
+        return node.textContent.trim();
+      }
+
+      function normaliseUrl(value) {
+        const trimmed = value.trim();
+        if (!trimmed) return "#";
+        if (/^(https?:)?\/\//i.test(trimmed)) return trimmed.startsWith("//") ? `https:${trimmed}` : trimmed;
+        return `https://${trimmed}`;
+      }
+
+      function normalisePhone(value) {
+        const trimmed = value.trim();
+        const plus = trimmed.startsWith("+") ? "+" : "";
+        const digits = trimmed.replace(/[^0-9]/g, "");
+        return digits ? `tel:${plus}${digits}` : "#";
+      }
+
+      function syncLinks() {
+        document.querySelectorAll("#resume [data-link]").forEach((link) => {
+          const type = link.dataset.link;
+          const text = getEditableText(link);
+
+          if (type === "phone") link.href = normalisePhone(text);
+          if (type === "email") link.href = text ? `mailto:${text.replace(/\s+/g, "")}` : "#";
+          if (type === "web") link.href = normaliseUrl(text);
+          if (type === "map") {
+            const query = encodeURIComponent(text);
+            link.href = query ? `https://www.google.com/maps/search/?api=1&query=${query}` : "#";
+          }
+        });
+      }
+
+      function persistResume() {
+        syncLinks();
+        safeStorageSet(STORAGE_KEY, resume.innerHTML);
+      }
+
+      function schedulePersist() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(persistResume, 250);
+      }
+
+      function setEditing(nextState) {
+        isEditing = Boolean(nextState);
+        document.body.classList.toggle("is-editing", isEditing);
+        document.querySelectorAll("#resume [data-edit='true']").forEach((node) => {
+          node.setAttribute("contenteditable", isEditing ? "true" : "false");
+          node.setAttribute("spellcheck", "true");
+        });
+        editToggle.textContent = isEditing ? "關閉編輯模式" : "開啟編輯模式";
+        if (!isEditing) persistResume();
+      }
+
+      function downloadCurrentHtml() {
+        persistResume();
+        const wasEditing = isEditing;
+        setEditing(false);
+        const html = `<!doctype html>\n${document.documentElement.outerHTML}`;
+        const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const nameText = document.querySelector(".name")?.textContent.trim().replace(/\s+/g, "-").toLowerCase() || "resume";
+        a.href = url;
+        a.download = `${nameText}-resume.html`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        if (wasEditing) setEditing(true);
+      }
+
+      function restoreSavedResume() {
+        const saved = safeStorageGet(STORAGE_KEY);
+        if (saved) resume.innerHTML = saved;
+        syncLinks();
+        setEditing(false);
+      }
+
+      resume.addEventListener("input", schedulePersist);
+      resume.addEventListener("focusout", persistResume);
+
+      resume.addEventListener("click", (event) => {
+        if (!isEditing) return;
+        const link = event.target.closest("a");
+        if (link) event.preventDefault();
+      });
+
+      editToggle.addEventListener("click", () => setEditing(!isEditing));
+      downloadHtml.addEventListener("click", downloadCurrentHtml);
+      printPdf.addEventListener("click", () => {
+        persistResume();
+        setEditing(false);
+        window.print();
+      });
+
+      resetResume.addEventListener("click", () => {
+        const ok = window.confirm("確定要還原範例內容？目前已編輯的內容會從本機暫存移除。");
+        if (!ok) return;
+        safeStorageRemove(STORAGE_KEY);
+        resume.innerHTML = originalResumeHtml;
+        syncLinks();
+        setEditing(false);
+      });
+
+      window.addEventListener("beforeprint", () => {
+        persistResume();
+        setEditing(false);
+      });
+
+      restoreSavedResume();
+    })();
+  </script>
+</body>
 </html>
