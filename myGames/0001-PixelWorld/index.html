@@ -852,5 +852,65 @@
 </head>
 <body>
   <div id="app"></div>
+  <script>
+    (() => {
+      const selectors = [
+        '.hud-social-action-button',
+        '.game-social-action-button',
+        '.social-action-button',
+        '.social-action-panel',
+        '.game-social-action-panel',
+      ];
+
+      const moveToBottomRight = (element) => {
+        if (!element || !(element instanceof HTMLElement)) {
+          return;
+        }
+
+        element.style.setProperty('position', 'fixed', 'important');
+        element.style.setProperty('left', 'auto', 'important');
+        element.style.setProperty('right', 'max(18px, env(safe-area-inset-right))', 'important');
+        element.style.setProperty('top', 'auto', 'important');
+        element.style.setProperty('bottom', 'max(18px, env(safe-area-inset-bottom))', 'important');
+        element.style.setProperty('z-index', '9999', 'important');
+        element.style.setProperty('transform', 'none', 'important');
+      };
+
+      const applyFix = () => {
+        const allElements = new Set();
+        selectors.forEach((selector) => {
+          document.querySelectorAll(selector).forEach((el) => {
+            allElements.add(el);
+          });
+        });
+        allElements.forEach((el) => moveToBottomRight(el));
+      };
+
+      const run = () => {
+        applyFix();
+        window.setTimeout(run, 600);
+      };
+
+      const observer = new MutationObserver(() => {
+        applyFix();
+      });
+
+      if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+      } else {
+        window.addEventListener('DOMContentLoaded', () => {
+          observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        });
+      }
+
+      window.addEventListener('load', applyFix);
+      window.addEventListener('orientationchange', () => {
+        applyFix();
+      });
+
+      applyFix();
+      run();
+    })();
+  </script>
 </body>
 </html>

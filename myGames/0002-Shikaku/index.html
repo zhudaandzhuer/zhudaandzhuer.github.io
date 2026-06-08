@@ -1,0 +1,1639 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#090d13" />
+  <title>Shikaku 7×7</title>
+  <link rel="icon" type="image/png" sizes="256x256" href="./assets/shikaku-icon.png">
+  <link rel="icon" type="image/png" href="./assets/shikaku-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/shikaku-icon.png">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090d13;
+      --bg-2: #101721;
+      --panel: rgba(18, 25, 34, 0.88);
+      --panel-2: rgba(255, 255, 255, 0.075);
+      --cell: #27313c;
+      --cell-2: #202934;
+      --text: #f5f7fb;
+      --muted: #98a3b6;
+      --muted-2: #687386;
+      --line: rgba(255, 255, 255, 0.08);
+      --good: #8bd7be;
+      --bad: #ff7b8d;
+      --warn: #ffe28c;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+      --gap: clamp(5px, 1.35vw, 8px);
+      --cell-radius: clamp(10px, 2.7vw, 16px);
+      --block-radius: clamp(13px, 3.2vw, 19px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(130, 213, 195, 0.14), transparent 26%),
+        radial-gradient(circle at 86% 22%, rgba(190, 164, 241, 0.16), transparent 30%),
+        radial-gradient(circle at 48% 92%, rgba(103, 134, 218, 0.10), transparent 34%),
+        linear-gradient(180deg, #05080d 0%, var(--bg) 55%, #060910 100%);
+      color: var(--text);
+      font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      overscroll-behavior: none;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    button {
+      border: 0;
+      font: inherit;
+      color: inherit;
+    }
+
+    .app {
+      width: min(100%, 540px);
+      min-height: 100dvh;
+      padding: calc(12px + var(--safe-top)) 16px calc(14px + var(--safe-bottom));
+      display: grid;
+      grid-template-rows: auto auto minmax(0, auto) auto auto;
+      gap: 13px;
+      position: relative;
+    }
+
+    .topbar {
+      min-height: 118px;
+      display: grid;
+      grid-template-columns: 54px 1fr 54px;
+      align-items: start;
+      padding-top: 4px;
+    }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .icon-btn:active,
+    .action-btn:active,
+    .primary-btn:active {
+      transform: scale(0.96);
+    }
+
+    .icon-btn:hover,
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.13);
+    }
+
+    .header-copy {
+      text-align: center;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .date-line {
+      color: rgba(255, 255, 255, 0.38);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      font-size: clamp(22px, 6vw, 36px);
+      line-height: 1;
+      margin: 2px 0 30px;
+      white-space: nowrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 8.6vw, 46px);
+      letter-spacing: 0.045em;
+      font-weight: 900;
+      line-height: 0.95;
+    }
+
+    .timer {
+      margin-top: 8px;
+      font-size: clamp(28px, 8vw, 44px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0.055em;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+    }
+
+    .status-card {
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      min-height: 54px;
+    }
+
+    .status-text {
+      min-width: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 14px;
+      line-height: 1.28;
+      letter-spacing: 0.01em;
+    }
+
+    .status-chip {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.075);
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--good);
+      box-shadow: 0 0 18px rgba(139, 215, 190, 0.8);
+    }
+
+    .board-shell {
+      width: min(100%, 488px);
+      margin: 0 auto;
+      border-radius: 30px;
+      padding: 10px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02)),
+        rgba(10, 15, 22, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.065);
+      box-shadow: 0 36px 90px rgba(0, 0, 0, 0.46);
+      user-select: none;
+    }
+
+    .board {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      touch-action: none;
+      isolation: isolate;
+      border-radius: 22px;
+    }
+
+    .grid,
+    .blocks {
+      position: absolute;
+      inset: 0;
+    }
+
+    .blocks {
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .grid {
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-template-rows: repeat(7, minmax(0, 1fr));
+      gap: var(--gap);
+    }
+
+    .cell {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      border-radius: var(--cell-radius);
+      background: linear-gradient(180deg, var(--cell) 0%, var(--cell-2) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      overflow: hidden;
+      color: rgba(255, 255, 255, 0.93);
+      transition: background 90ms linear, color 140ms ease, transform 110ms ease, box-shadow 140ms ease;
+      cursor: crosshair;
+    }
+
+    .cell.filled,
+    .cell.draft {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .cell.clue::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.055);
+      pointer-events: none;
+    }
+
+    .cell .num {
+      position: relative;
+      z-index: 4;
+      text-align: center;
+      width: 100%;
+      line-height: 1;
+      font-weight: 950;
+      font-size: clamp(21px, 7.35vw, 41px);
+      letter-spacing: -0.035em;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.16);
+    }
+
+    .block {
+      position: absolute;
+      border-radius: var(--block-radius);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.20),
+        inset 0 -16px 28px rgba(0, 0, 0, 0.09),
+        0 11px 32px rgba(0, 0, 0, 0.20);
+      opacity: 0.96;
+      transform: translateZ(0);
+      will-change: left, top, width, height;
+      transition: left 70ms ease, top 70ms ease, width 70ms ease, height 70ms ease, opacity 120ms ease, transform 120ms ease;
+    }
+
+    .block.draft {
+      opacity: 0.80;
+      z-index: 2;
+      outline: 2px solid rgba(255, 255, 255, 0.22);
+      outline-offset: -2px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.24),
+        0 14px 38px rgba(0, 0, 0, 0.28);
+    }
+
+    .block.invalid {
+      background: linear-gradient(135deg, rgba(255, 123, 141, 0.86), rgba(214, 73, 96, 0.82)) !important;
+      outline-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .selection-badge {
+      position: absolute;
+      z-index: 6;
+      min-width: 54px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(11, 15, 22, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      pointer-events: none;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+      transform: translate(-50%, -125%);
+      backdrop-filter: blur(12px);
+    }
+
+    .selection-badge.good {
+      background: rgba(33, 113, 92, 0.86);
+    }
+
+    .selection-badge.bad {
+      background: rgba(168, 53, 72, 0.88);
+    }
+
+    .board.shake {
+      animation: shake 220ms ease both;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      22% { transform: translateX(-5px); }
+      45% { transform: translateX(5px); }
+      68% { transform: translateX(-3px); }
+      86% { transform: translateX(2px); }
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 9px;
+      width: min(100%, 488px);
+      margin: 0 auto;
+    }
+
+    .action-btn {
+      height: 48px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.065);
+      border: 1px solid rgba(255, 255, 255, 0.085);
+      color: rgba(255, 255, 255, 0.86);
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease, opacity 140ms ease, border-color 140ms ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+    }
+
+    .action-btn[disabled] {
+      opacity: 0.38;
+      cursor: not-allowed;
+    }
+
+    .action-btn.answer-armed {
+      background: rgba(255, 226, 140, 0.16);
+      border-color: rgba(255, 226, 140, 0.28);
+      color: #ffe8a4;
+    }
+
+    .progress-card {
+      width: min(100%, 488px);
+      margin: 0 auto;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.052);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      padding: 12px 13px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .progress-bar {
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(139, 215, 190, 0.85), rgba(198, 181, 242, 0.92));
+      transition: width 220ms ease;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(24px + var(--safe-bottom));
+      transform: translate(-50%, 18px);
+      z-index: 30;
+      max-width: min(92vw, 460px);
+      padding: 12px 15px;
+      border-radius: 999px;
+      background: rgba(13, 18, 25, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      color: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 20px 54px rgba(0, 0, 0, 0.40);
+      backdrop-filter: blur(18px);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 160ms ease, transform 160ms ease;
+      font-weight: 850;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      display: grid;
+      place-items: end center;
+      padding: 20px 16px calc(20px + var(--safe-bottom));
+      background: rgba(0, 0, 0, 0.54);
+      backdrop-filter: blur(9px);
+    }
+
+    .sheet[hidden] {
+      display: none;
+    }
+
+    .sheet-card {
+      width: min(100%, 500px);
+      border-radius: 28px;
+      padding: 20px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035)),
+        #121923;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.52);
+    }
+
+    .sheet-card h2 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      line-height: 1.12;
+    }
+
+    .sheet-card p {
+      margin: 10px 0;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .rules {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0 18px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .rules li {
+      display: grid;
+      grid-template-columns: 25px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .rule-num {
+      width: 25px;
+      height: 25px;
+      border-radius: 9px;
+      background: rgba(139, 215, 190, 0.16);
+      color: #bdf2df;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      font-size: 12px;
+    }
+
+    .primary-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(139, 215, 190, 0.92), rgba(198, 181, 242, 0.92));
+      color: #121923;
+      font-weight: 950;
+      cursor: pointer;
+      transition: transform 140ms ease, filter 140ms ease;
+    }
+
+    .win-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+
+    .win-stat {
+      border-radius: 18px;
+      padding: 13px;
+      background: rgba(255, 255, 255, 0.065);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+    }
+
+    .win-stat strong {
+      display: block;
+      font-size: 22px;
+      font-variant-numeric: tabular-nums;
+      margin-top: 5px;
+    }
+
+    .win-stat span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    @media (max-height: 760px) {
+      .app {
+        gap: 10px;
+      }
+
+      .topbar {
+        min-height: 92px;
+      }
+
+      .date-line {
+        display: none;
+      }
+
+      h1 {
+        font-size: clamp(28px, 7vw, 38px);
+      }
+
+      .timer {
+        font-size: clamp(26px, 7.4vw, 38px);
+      }
+
+      .status-card {
+        padding: 10px 12px;
+        min-height: 46px;
+      }
+
+      .actions {
+        gap: 7px;
+      }
+
+      .action-btn {
+        height: 44px;
+        border-radius: 15px;
+        font-size: 13px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 1ms !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="Shikaku 7×7 遊戲">
+    <header class="topbar">
+      <button class="icon-btn" id="newTopBtn" type="button" aria-label="開新局">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M20 12a8 8 0 1 1-2.34-5.66" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M20 4v6h-6" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="header-copy">
+        <div class="date-line" id="dateLine">Wednesday, 18 March</div>
+        <h1>Shikaku</h1>
+        <div class="timer" id="timer">00:00</div>
+      </div>
+
+      <button class="icon-btn" id="helpBtn" type="button" aria-label="玩法說明">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9.7 9.15a2.55 2.55 0 0 1 5.02.56c0 2.34-2.72 2.15-2.72 4.32" stroke="currentColor" stroke-width="2.35" stroke-linecap="round"/>
+          <path d="M12 18.25h.01" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="2" opacity=".55"/>
+        </svg>
+      </button>
+    </header>
+
+    <section class="status-card" aria-live="polite">
+      <div class="status-text" id="statusText">拖出一個矩形；裡面只能有一個數字，格數要等於它。</div>
+      <div class="status-chip" id="puzzleChip"><span class="status-dot"></span><span>7×7</span></div>
+    </section>
+
+    <section class="board-shell">
+      <div class="board" id="board" aria-label="7 乘 7 數讀盤">
+        <div class="blocks" id="blocks" aria-hidden="true"></div>
+        <div class="grid" id="grid" role="grid" aria-rowcount="7" aria-colcount="7"></div>
+        <div class="selection-badge" id="selectionBadge" hidden>0</div>
+      </div>
+    </section>
+
+    <nav class="actions" aria-label="遊戲操作">
+      <button class="action-btn" id="newBtn" type="button">新局</button>
+      <button class="action-btn" id="clearBtn" type="button">清空</button>
+      <button class="action-btn" id="hintBtn" type="button">提示</button>
+      <button class="action-btn" id="undoBtn" type="button" disabled>回復</button>
+      <button class="action-btn" id="answerBtn" type="button">答案</button>
+    </nav>
+
+    <section class="progress-card" aria-label="完成進度">
+      <div class="progress-bar"><span class="progress-fill" id="progressFill"></span></div>
+      <div class="progress-row">
+        <span id="filledText">已上色 0 / 49</span>
+        <span id="bestText">最佳：—</span>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <section class="sheet" id="helpSheet" hidden aria-modal="true" role="dialog" aria-labelledby="helpTitle">
+    <div class="sheet-card">
+      <h2 id="helpTitle">玩法</h2>
+      <p>每一個數字都是一塊矩形區域的面積。你的任務是把 7×7 全部上色。</p>
+      <ul class="rules">
+        <li><span class="rule-num">1</span><span>從任意一格按住拖曳，拉出矩形選區。</span></li>
+        <li><span class="rule-num">2</span><span>矩形裡只能包含一個數字，而且格數必須等於那個數字。</span></li>
+        <li><span class="rule-num">3</span><span>所有區塊不可重疊，最後 49 格都要被上色。</span></li>
+      </ul>
+      <button class="primary-btn" id="closeHelpBtn" type="button">開始玩</button>
+    </div>
+  </section>
+
+  <section class="sheet" id="winSheet" hidden aria-modal="true" role="dialog" aria-labelledby="winTitle">
+    <div class="sheet-card">
+      <h2 id="winTitle">完成！</h2>
+      <p>整個數讀盤都已正確上色。</p>
+      <div class="win-stats">
+        <div class="win-stat"><span>本局時間</span><strong id="winTime">00:00</strong></div>
+        <div class="win-stat"><span>最佳時間</span><strong id="winBest">—</strong></div>
+      </div>
+      <button class="primary-btn" id="nextGameBtn" type="button">下一局</button>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const SIZE = 7;
+      const TOTAL = SIZE * SIZE;
+      const MIN_AREA = 2;
+      const DEFAULT_MAX_AREA = 12;
+      const BEST_KEY = "shikaku-7x7-best-v1";
+      const HELP_KEY = "shikaku-7x7-help-seen-v1";
+
+      const palette = [
+        "#93cfbe", "#c8b8ed", "#b7b06f", "#a46294", "#82a7e6",
+        "#e1a87f", "#89c98b", "#d8899b", "#9fc8ee", "#e0cf83",
+        "#a9d5ad", "#bc9fe0", "#7fc6ca", "#d5a06e"
+      ];
+
+      const els = {
+        dateLine: document.getElementById("dateLine"),
+        timer: document.getElementById("timer"),
+        statusText: document.getElementById("statusText"),
+        puzzleChip: document.getElementById("puzzleChip"),
+        board: document.getElementById("board"),
+        grid: document.getElementById("grid"),
+        blocks: document.getElementById("blocks"),
+        selectionBadge: document.getElementById("selectionBadge"),
+        progressFill: document.getElementById("progressFill"),
+        filledText: document.getElementById("filledText"),
+        bestText: document.getElementById("bestText"),
+        toast: document.getElementById("toast"),
+        helpSheet: document.getElementById("helpSheet"),
+        winSheet: document.getElementById("winSheet"),
+        winTime: document.getElementById("winTime"),
+        winBest: document.getElementById("winBest"),
+        newTopBtn: document.getElementById("newTopBtn"),
+        helpBtn: document.getElementById("helpBtn"),
+        closeHelpBtn: document.getElementById("closeHelpBtn"),
+        nextGameBtn: document.getElementById("nextGameBtn"),
+        newBtn: document.getElementById("newBtn"),
+        clearBtn: document.getElementById("clearBtn"),
+        hintBtn: document.getElementById("hintBtn"),
+        undoBtn: document.getElementById("undoBtn"),
+        answerBtn: document.getElementById("answerBtn")
+      };
+
+      let cellEls = [];
+      let clueByIndex = new Map();
+      let solutionRects = [];
+      let regions = new Map();
+      let owners = Array(TOTAL).fill(null);
+      let nextRegionId = 1;
+      let activePalette = [];
+      let puzzleNo = 0;
+      let draft = null;
+      let gesture = null;
+      let moveFrame = 0;
+      let timerId = 0;
+      let startAt = 0;
+      let elapsedSeconds = 0;
+      let gameWon = false;
+      let answerArmed = false;
+      let undoStack = [];
+      let toastTimer = 0;
+
+      function init() {
+        buildGrid();
+        setDateLine();
+        bindEvents();
+        updateBestText();
+        newGame();
+
+        try {
+          if (!localStorage.getItem(HELP_KEY)) {
+            setTimeout(() => showHelp(), 420);
+            localStorage.setItem(HELP_KEY, "1");
+          }
+        } catch (_) {}
+      }
+
+      function buildGrid() {
+        els.grid.innerHTML = "";
+        cellEls = [];
+
+        for (let i = 0; i < TOTAL; i += 1) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.dataset.index = String(i);
+          cell.setAttribute("role", "gridcell");
+          cell.setAttribute("aria-rowindex", String(rowOf(i) + 1));
+          cell.setAttribute("aria-colindex", String(colOf(i) + 1));
+
+          const num = document.createElement("span");
+          num.className = "num";
+          cell.appendChild(num);
+
+          els.grid.appendChild(cell);
+          cellEls.push(cell);
+        }
+      }
+
+      function setDateLine() {
+        const date = new Date();
+        try {
+          const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+          const day = new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(date);
+          const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
+          els.dateLine.textContent = `${weekday}, ${day} ${month}`;
+        } catch (_) {
+          els.dateLine.textContent = "Shikaku 7×7";
+        }
+      }
+
+      function bindEvents() {
+        els.board.addEventListener("pointerdown", onPointerDown);
+        els.board.addEventListener("pointermove", onPointerMove);
+        els.board.addEventListener("pointerup", onPointerUp);
+        els.board.addEventListener("pointercancel", onPointerCancel);
+        els.board.addEventListener("lostpointercapture", onPointerCancel);
+
+        els.newTopBtn.addEventListener("click", newGame);
+        els.newBtn.addEventListener("click", newGame);
+        els.clearBtn.addEventListener("click", clearBoard);
+        els.hintBtn.addEventListener("click", giveHint);
+        els.undoBtn.addEventListener("click", undo);
+        els.answerBtn.addEventListener("click", onAnswerClick);
+        els.helpBtn.addEventListener("click", showHelp);
+        els.closeHelpBtn.addEventListener("click", hideHelp);
+        els.nextGameBtn.addEventListener("click", () => {
+          hideWin();
+          newGame();
+        });
+
+        window.addEventListener("resize", () => requestAnimationFrame(renderBlocks));
+        if ("ResizeObserver" in window) {
+          const resizeObserver = new ResizeObserver(() => renderBlocks());
+          resizeObserver.observe(els.board);
+        }
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            hideHelp();
+            hideWin();
+            if (gesture) cancelGesture(true);
+          }
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+            event.preventDefault();
+            undo();
+          }
+        });
+      }
+
+      function newGame() {
+        answerArmed = false;
+        els.answerBtn.classList.remove("answer-armed");
+        hideWin();
+        resetTimer();
+        puzzleNo = Math.floor(10000 + Math.random() * 90000);
+        activePalette = shuffle([...palette]);
+        solutionRects = generatePuzzleRects();
+        clueByIndex = makeClues(solutionRects);
+        regions = new Map();
+        owners = Array(TOTAL).fill(null);
+        nextRegionId = 1;
+        undoStack = [];
+        draft = null;
+        gesture = null;
+        gameWon = false;
+        els.puzzleChip.innerHTML = `<span class="status-dot"></span><span>#${puzzleNo}</span>`;
+        setStatus("拖出一個矩形；裡面只能有一個數字，格數要等於它。");
+        updateUndoButton();
+        render();
+        startTimer();
+      }
+
+      function generatePuzzleRects() {
+        const targetCount = 8 + Math.floor(Math.random() * 4); // 8 - 11 regions
+        let rects = [{ r: 0, c: 0, h: SIZE, w: SIZE }];
+        let guard = 0;
+
+        while (guard < 120) {
+          guard += 1;
+          const oversized = rects
+            .map((rect, index) => ({ rect, index, area: areaOfRect(rect) }))
+            .filter(item => item.area > DEFAULT_MAX_AREA)
+            .sort((a, b) => b.area - a.area);
+
+          if (oversized.length === 0) break;
+          const picked = oversized[0];
+          const split = pickSplit(picked.rect);
+          if (!split) break;
+          rects.splice(picked.index, 1, split[0], split[1]);
+        }
+
+        guard = 0;
+        while (rects.length < targetCount && guard < 90) {
+          guard += 1;
+          const candidates = rects
+            .map((rect, index) => ({ rect, index, area: areaOfRect(rect), options: splitOptions(rect) }))
+            .filter(item => item.options.length > 0 && item.area >= 6)
+            .sort((a, b) => b.area - a.area);
+
+          if (!candidates.length) break;
+          const picked = weightedPick(candidates, item => Math.max(1, item.area));
+          const split = pickSplit(picked.rect);
+          if (!split) break;
+          rects.splice(picked.index, 1, split[0], split[1]);
+        }
+
+        return rects.map((rect, index) => ({
+          ...rect,
+          id: index + 1,
+          area: areaOfRect(rect),
+          cells: rectCells(rect)
+        }));
+      }
+
+      function splitOptions(rect) {
+        const options = [];
+
+        for (let cut = 1; cut < rect.h; cut += 1) {
+          const a = cut * rect.w;
+          const b = (rect.h - cut) * rect.w;
+          if (a >= MIN_AREA && b >= MIN_AREA) {
+            options.push([
+              { r: rect.r, c: rect.c, h: cut, w: rect.w },
+              { r: rect.r + cut, c: rect.c, h: rect.h - cut, w: rect.w }
+            ]);
+          }
+        }
+
+        for (let cut = 1; cut < rect.w; cut += 1) {
+          const a = cut * rect.h;
+          const b = (rect.w - cut) * rect.h;
+          if (a >= MIN_AREA && b >= MIN_AREA) {
+            options.push([
+              { r: rect.r, c: rect.c, h: rect.h, w: cut },
+              { r: rect.r, c: rect.c + cut, h: rect.h, w: rect.w - cut }
+            ]);
+          }
+        }
+
+        return options;
+      }
+
+      function pickSplit(rect) {
+        const options = splitOptions(rect);
+        if (!options.length) return null;
+        return weightedPick(options, pair => {
+          const a = areaOfRect(pair[0]);
+          const b = areaOfRect(pair[1]);
+          const balance = 1 / (1 + Math.abs(a - b));
+          const shape = shapeScore(pair[0]) + shapeScore(pair[1]);
+          return balance * 8 + shape;
+        });
+      }
+
+      function shapeScore(rect) {
+        const shortSide = Math.min(rect.h, rect.w);
+        const longSide = Math.max(rect.h, rect.w);
+        return shortSide / longSide;
+      }
+
+      function makeClues(rects) {
+        const clues = new Map();
+        for (const rect of rects) {
+          const cells = rect.cells;
+          const clueIndex = cells[Math.floor(Math.random() * cells.length)];
+          rect.clueIndex = clueIndex;
+          clues.set(clueIndex, rect.area);
+        }
+        return clues;
+      }
+
+      function render() {
+        const draftSet = draft ? new Set(draft.cells) : new Set();
+        for (let i = 0; i < TOTAL; i += 1) {
+          const cell = cellEls[i];
+          const num = cell.firstElementChild;
+          const clue = clueByIndex.get(i);
+          const ownerId = owners[i];
+          const isOwned = ownerId !== null && ownerId !== undefined;
+          const isDraft = draftSet.has(i);
+          const classes = ["cell"];
+
+          if (clue) classes.push("clue");
+          if (isOwned) classes.push("filled");
+          if (isDraft) classes.push("draft");
+          cell.className = classes.join(" ");
+          num.textContent = clue ? String(clue) : "";
+
+          if (isDraft && draft) {
+            cell.style.color = draft.valid ? textColorFor(draft.color) : "#ffffff";
+          } else if (isOwned) {
+            const region = regions.get(ownerId);
+            cell.style.color = region ? textColorFor(region.color) : "rgba(255,255,255,.9)";
+          } else {
+            cell.style.color = "rgba(255, 255, 255, 0.92)";
+          }
+        }
+
+        renderBlocks();
+        renderBadge();
+        updateProgress();
+      }
+
+      function renderBlocks() {
+        els.blocks.innerHTML = "";
+
+        for (const region of regions.values()) {
+          addBlock(region, region.color, "");
+        }
+
+        if (draft) {
+          addBlock(draft, draft.valid ? draft.color : "#d8576d", draft.valid ? "draft" : "draft invalid");
+        }
+      }
+
+      function addBlock(shape, color, extraClass) {
+        if (!shape || !shape.cells || !shape.cells.length) return;
+        const rect = boundsOfCells(shape.cells);
+        const first = cellEls[indexOf(rect.r, rect.c)];
+        const last = cellEls[indexOf(rect.r + rect.h - 1, rect.c + rect.w - 1)];
+        if (!first || !last) return;
+
+        const block = document.createElement("div");
+        block.className = `block ${extraClass || ""}`.trim();
+        block.style.background = color;
+        block.style.left = `${first.offsetLeft}px`;
+        block.style.top = `${first.offsetTop}px`;
+        block.style.width = `${last.offsetLeft + last.offsetWidth - first.offsetLeft}px`;
+        block.style.height = `${last.offsetTop + last.offsetHeight - first.offsetTop}px`;
+        els.blocks.appendChild(block);
+      }
+
+      function renderBadge() {
+        if (!draft) {
+          els.selectionBadge.hidden = true;
+          return;
+        }
+
+        const currentIndex = draft.currentIndex ?? draft.cells[draft.cells.length - 1];
+        const cell = cellEls[currentIndex];
+        if (!cell) {
+          els.selectionBadge.hidden = true;
+          return;
+        }
+
+        const area = draft.cells.length;
+        const targetText = draft.target ? ` / ${draft.target}` : "";
+        els.selectionBadge.textContent = `${area}${targetText}`;
+        els.selectionBadge.className = `selection-badge ${draft.valid ? "good" : "bad"}`;
+        els.selectionBadge.hidden = false;
+        els.selectionBadge.style.left = `${cell.offsetLeft + cell.offsetWidth / 2}px`;
+        els.selectionBadge.style.top = `${cell.offsetTop + 4}px`;
+      }
+
+      function onPointerDown(event) {
+        if (gameWon) return;
+        const index = cellIndexFromPoint(event.clientX, event.clientY);
+        if (index === null) return;
+
+        event.preventDefault();
+        answerArmed = false;
+        els.answerBtn.classList.remove("answer-armed");
+
+        try { els.board.setPointerCapture(event.pointerId); } catch (_) {}
+
+        const beforeSnapshot = makeSnapshot();
+        const backup = owners[index] != null ? removeRegion(owners[index]) : null;
+        gesture = {
+          pointerId: event.pointerId,
+          startIndex: index,
+          currentIndex: index,
+          startX: event.clientX,
+          startY: event.clientY,
+          moved: false,
+          backup,
+          beforeSnapshot,
+          color: backup ? backup.color : colorForNextRegion()
+        };
+
+        updateDraft(index);
+      }
+
+      function onPointerMove(event) {
+        if (!gesture || event.pointerId !== gesture.pointerId) return;
+        event.preventDefault();
+
+        const index = cellIndexFromPoint(event.clientX, event.clientY);
+        const dx = Math.abs(event.clientX - gesture.startX);
+        const dy = Math.abs(event.clientY - gesture.startY);
+        if (dx + dy > 7) gesture.moved = true;
+        if (index === null || index === gesture.currentIndex) return;
+
+        gesture.currentIndex = index;
+        gesture.moved = true;
+        if (!moveFrame) {
+          moveFrame = requestAnimationFrame(() => {
+            moveFrame = 0;
+            if (gesture) updateDraft(gesture.currentIndex);
+          });
+        }
+      }
+
+      function onPointerUp(event) {
+        if (!gesture || event.pointerId !== gesture.pointerId) return;
+        event.preventDefault();
+        finishGesture();
+      }
+
+      function onPointerCancel(event) {
+        if (!gesture) return;
+        if (event && event.pointerId !== undefined && event.pointerId !== gesture.pointerId) return;
+        cancelGesture(true);
+      }
+
+      function updateDraft(currentIndex) {
+        if (!gesture) return;
+        const rect = rectBetween(gesture.startIndex, currentIndex);
+        const validation = validateCells(rect.cells);
+        draft = {
+          ...rect,
+          currentIndex,
+          color: gesture.color,
+          valid: validation.ok,
+          target: validation.target,
+          clueIndex: validation.clueIndex,
+          message: validation.message
+        };
+
+        if (validation.ok) {
+          setStatus(`可放置：選取 ${rect.cells.length} 格，剛好等於 ${validation.target}。`);
+        } else {
+          setStatus(validation.message);
+        }
+
+        render();
+      }
+
+      function finishGesture() {
+        const currentGesture = gesture;
+        const currentDraft = draft;
+
+        gesture = null;
+        draft = null;
+        if (moveFrame) {
+          cancelAnimationFrame(moveFrame);
+          moveFrame = 0;
+        }
+
+        if (!currentGesture || !currentDraft) {
+          render();
+          return;
+        }
+
+        if (!currentGesture.moved && currentGesture.backup) {
+          pushUndoSnapshot(currentGesture.beforeSnapshot);
+          setStatus("已清除一塊；重新拖曳即可再上色。");
+          showToast("已清除區塊");
+          haptic(8);
+          render();
+          return;
+        }
+
+        if (currentDraft.valid) {
+          pushUndoSnapshot(currentGesture.beforeSnapshot);
+          commitRegion(currentDraft, currentGesture.color);
+          haptic(12);
+          setStatus("放置成功。繼續把所有灰格上色。");
+          render();
+          checkWin();
+          return;
+        }
+
+        if (currentGesture.backup) restoreRegion(currentGesture.backup);
+        render();
+        setStatus(currentDraft.message || "這塊不符合數字要求。");
+        showToast(currentDraft.message || "這塊不符合數字要求");
+        shakeBoard();
+        haptic([20, 30, 20]);
+      }
+
+      function cancelGesture(restoreBackup) {
+        const backup = gesture && gesture.backup;
+        gesture = null;
+        draft = null;
+        if (moveFrame) {
+          cancelAnimationFrame(moveFrame);
+          moveFrame = 0;
+        }
+        if (restoreBackup && backup) restoreRegion(backup);
+        setStatus("拖出一個矩形；裡面只能有一個數字，格數要等於它。");
+        render();
+      }
+
+      function validateCells(cells) {
+        const clueCells = cells.filter(index => clueByIndex.has(index));
+        const area = cells.length;
+        const blocked = cells.find(index => owners[index] != null);
+
+        if (blocked !== undefined) {
+          return { ok: false, message: "不能覆蓋已經上色的區塊。" };
+        }
+
+        if (clueCells.length === 0) {
+          return { ok: false, message: `選取 ${area} 格；矩形內需要包含一個數字。` };
+        }
+
+        if (clueCells.length > 1) {
+          return { ok: false, message: `選取 ${area} 格；矩形內只能有一個數字。`, clueIndex: clueCells[0], target: clueByIndex.get(clueCells[0]) };
+        }
+
+        const clueIndex = clueCells[0];
+        const target = clueByIndex.get(clueIndex);
+        if (area !== target) {
+          return { ok: false, message: `選取 ${area} 格；目標是 ${target} 格。`, clueIndex, target };
+        }
+
+        return { ok: true, message: "可以放置。", clueIndex, target };
+      }
+
+      function commitRegion(shape, color) {
+        const id = nextRegionId;
+        nextRegionId += 1;
+        const region = {
+          id,
+          cells: [...shape.cells],
+          clueIndex: shape.clueIndex,
+          value: shape.target,
+          color
+        };
+        regions.set(id, region);
+        for (const index of region.cells) owners[index] = id;
+      }
+
+      function removeRegion(id) {
+        const region = regions.get(id);
+        if (!region) return null;
+        const backup = {
+          id: region.id,
+          cells: [...region.cells],
+          clueIndex: region.clueIndex,
+          value: region.value,
+          color: region.color
+        };
+        for (const index of region.cells) owners[index] = null;
+        regions.delete(id);
+        return backup;
+      }
+
+      function restoreRegion(region) {
+        if (!region) return;
+        regions.set(region.id, {
+          id: region.id,
+          cells: [...region.cells],
+          clueIndex: region.clueIndex,
+          value: region.value,
+          color: region.color
+        });
+        for (const index of region.cells) owners[index] = region.id;
+        nextRegionId = Math.max(nextRegionId, region.id + 1);
+      }
+
+      function clearBoard() {
+        if (!regions.size) {
+          showToast("目前還沒有上色區塊");
+          return;
+        }
+        pushUndo();
+        regions = new Map();
+        owners = Array(TOTAL).fill(null);
+        draft = null;
+        gesture = null;
+        gameWon = false;
+        setStatus("已清空。重新拖曳區塊即可開始。");
+        render();
+      }
+
+      function giveHint() {
+        if (gameWon) return;
+        const candidates = solutionRects.filter(rect => rect.cells.every(index => owners[index] == null));
+        if (!candidates.length) {
+          showToast("先點一下可疑區塊清除，再使用提示");
+          setStatus("目前沒有可直接放入的提示區塊；先清除重疊區塊。");
+          return;
+        }
+
+        const rect = weightedPick(candidates, item => Math.max(1, item.area));
+        pushUndo();
+        const color = colorForNextRegion();
+        const id = nextRegionId;
+        nextRegionId += 1;
+        regions.set(id, {
+          id,
+          cells: [...rect.cells],
+          clueIndex: rect.clueIndex,
+          value: rect.area,
+          color
+        });
+        for (const index of rect.cells) owners[index] = id;
+        setStatus(`提示已放入 ${rect.area} 格區塊。`);
+        showToast("提示已放入一塊");
+        haptic(10);
+        render();
+        checkWin();
+      }
+
+      function onAnswerClick() {
+        if (gameWon) return;
+        if (!answerArmed) {
+          answerArmed = true;
+          els.answerBtn.classList.add("answer-armed");
+          showToast("再按一次「答案」會顯示完整解答");
+          setTimeout(() => {
+            answerArmed = false;
+            els.answerBtn.classList.remove("answer-armed");
+          }, 2400);
+          return;
+        }
+        answerArmed = false;
+        els.answerBtn.classList.remove("answer-armed");
+        revealAnswer();
+      }
+
+      function revealAnswer() {
+        pushUndo();
+        regions = new Map();
+        owners = Array(TOTAL).fill(null);
+        nextRegionId = 1;
+        activePalette = shuffle([...palette]);
+
+        for (const rect of solutionRects) {
+          const id = nextRegionId;
+          nextRegionId += 1;
+          const color = colorForNextRegion(id - 1);
+          regions.set(id, {
+            id,
+            cells: [...rect.cells],
+            clueIndex: rect.clueIndex,
+            value: rect.area,
+            color
+          });
+          for (const index of rect.cells) owners[index] = id;
+        }
+
+        stopTimer();
+        gameWon = true;
+        setStatus("已顯示答案。本局不記錄最佳時間。");
+        showToast("已顯示完整答案");
+        render();
+      }
+
+      function makeSnapshot() {
+        return {
+          owners: [...owners],
+          nextRegionId,
+          regions: [...regions.values()].map(region => ({
+            id: region.id,
+            cells: [...region.cells],
+            clueIndex: region.clueIndex,
+            value: region.value,
+            color: region.color
+          })),
+          gameWon
+        };
+      }
+
+      function pushUndoSnapshot(snapshot) {
+        if (!snapshot) return;
+        undoStack.push(snapshot);
+        if (undoStack.length > 40) undoStack.shift();
+        updateUndoButton();
+      }
+
+      function pushUndo() {
+        pushUndoSnapshot(makeSnapshot());
+      }
+
+      function undo() {
+        if (!undoStack.length) return;
+        const snapshot = undoStack.pop();
+        owners = [...snapshot.owners];
+        nextRegionId = snapshot.nextRegionId;
+        regions = new Map(snapshot.regions.map(region => [region.id, {
+          id: region.id,
+          cells: [...region.cells],
+          clueIndex: region.clueIndex,
+          value: region.value,
+          color: region.color
+        }]));
+        gameWon = false;
+        hideWin();
+        if (!timerId) startTimer(true);
+        setStatus("已回復上一步。");
+        updateUndoButton();
+        render();
+      }
+
+      function updateUndoButton() {
+        els.undoBtn.disabled = undoStack.length === 0;
+      }
+
+      function checkWin() {
+        if (owners.some(owner => owner == null)) return false;
+        for (const region of regions.values()) {
+          const validation = validateCommittedRegion(region);
+          if (!validation) return false;
+        }
+
+        gameWon = true;
+        stopTimer();
+        const best = saveBest(elapsedSeconds);
+        updateBestText();
+        els.winTime.textContent = formatTime(elapsedSeconds);
+        els.winBest.textContent = best ? formatTime(best) : "—";
+        setStatus("完成！整個數讀盤都正確上色。");
+        showWin();
+        haptic([12, 24, 12]);
+        return true;
+      }
+
+      function validateCommittedRegion(region) {
+        const clueCells = region.cells.filter(index => clueByIndex.has(index));
+        if (clueCells.length !== 1) return false;
+        return region.cells.length === clueByIndex.get(clueCells[0]);
+      }
+
+      function updateProgress() {
+        const filled = owners.filter(owner => owner != null).length;
+        const percent = Math.round((filled / TOTAL) * 100);
+        els.progressFill.style.width = `${percent}%`;
+        els.filledText.textContent = `已上色 ${filled} / ${TOTAL}`;
+      }
+
+      function resetTimer() {
+        stopTimer();
+        elapsedSeconds = 0;
+        startAt = performance.now();
+        els.timer.textContent = "00:00";
+      }
+
+      function startTimer(continueFromElapsed = false) {
+        stopTimer();
+        const offset = continueFromElapsed ? elapsedSeconds * 1000 : 0;
+        startAt = performance.now() - offset;
+        timerId = window.setInterval(updateTimer, 250);
+        updateTimer();
+      }
+
+      function stopTimer() {
+        if (timerId) {
+          elapsedSeconds = Math.max(0, Math.floor((performance.now() - startAt) / 1000));
+          window.clearInterval(timerId);
+          timerId = 0;
+        }
+        els.timer.textContent = formatTime(elapsedSeconds);
+      }
+
+      function updateTimer() {
+        if (timerId) {
+          elapsedSeconds = Math.max(0, Math.floor((performance.now() - startAt) / 1000));
+        }
+        els.timer.textContent = formatTime(elapsedSeconds);
+      }
+
+      function formatTime(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const two = value => String(value).padStart(2, "0");
+        return hours > 0 ? `${hours}:${two(minutes)}:${two(seconds)}` : `${two(minutes)}:${two(seconds)}`;
+      }
+
+      function getBest() {
+        try {
+          const raw = Number(localStorage.getItem(BEST_KEY));
+          return Number.isFinite(raw) && raw > 0 ? raw : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function saveBest(seconds) {
+        const current = getBest();
+        if (!current || seconds < current) {
+          try { localStorage.setItem(BEST_KEY, String(seconds)); } catch (_) {}
+          return seconds;
+        }
+        return current;
+      }
+
+      function updateBestText() {
+        const best = getBest();
+        els.bestText.textContent = `最佳：${best ? formatTime(best) : "—"}`;
+      }
+
+      function colorForNextRegion(index = regions.size) {
+        if (!activePalette.length) activePalette = shuffle([...palette]);
+        return activePalette[index % activePalette.length];
+      }
+
+      function textColorFor(hex) {
+        const rgb = parseHex(hex);
+        if (!rgb) return "#121923";
+        const [r, g, b] = rgb.map(value => {
+          const srgb = value / 255;
+          return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4);
+        });
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return luminance > 0.46 ? "#1a2230" : "#ffffff";
+      }
+
+      function parseHex(hex) {
+        const value = String(hex).replace("#", "").trim();
+        if (value.length !== 6) return null;
+        const int = Number.parseInt(value, 16);
+        if (!Number.isFinite(int)) return null;
+        return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
+      }
+
+      function rectBetween(a, b) {
+        const r1 = rowOf(a);
+        const c1 = colOf(a);
+        const r2 = rowOf(b);
+        const c2 = colOf(b);
+        const r = Math.min(r1, r2);
+        const c = Math.min(c1, c2);
+        const h = Math.abs(r1 - r2) + 1;
+        const w = Math.abs(c1 - c2) + 1;
+        const cells = [];
+        for (let rr = r; rr < r + h; rr += 1) {
+          for (let cc = c; cc < c + w; cc += 1) {
+            cells.push(indexOf(rr, cc));
+          }
+        }
+        return { r, c, h, w, cells };
+      }
+
+      function rectCells(rect) {
+        const cells = [];
+        for (let r = rect.r; r < rect.r + rect.h; r += 1) {
+          for (let c = rect.c; c < rect.c + rect.w; c += 1) {
+            cells.push(indexOf(r, c));
+          }
+        }
+        return cells;
+      }
+
+      function boundsOfCells(cells) {
+        let minR = SIZE;
+        let minC = SIZE;
+        let maxR = 0;
+        let maxC = 0;
+        for (const index of cells) {
+          const r = rowOf(index);
+          const c = colOf(index);
+          minR = Math.min(minR, r);
+          minC = Math.min(minC, c);
+          maxR = Math.max(maxR, r);
+          maxC = Math.max(maxC, c);
+        }
+        return { r: minR, c: minC, h: maxR - minR + 1, w: maxC - minC + 1 };
+      }
+
+      function cellIndexFromPoint(clientX, clientY) {
+        if (!cellEls.length) return null;
+        const first = cellEls[0].getBoundingClientRect();
+        const second = cellEls[1].getBoundingClientRect();
+        const below = cellEls[SIZE].getBoundingClientRect();
+        const last = cellEls[TOTAL - 1].getBoundingClientRect();
+        const stepX = second.left - first.left;
+        const stepY = below.top - first.top;
+        const gapX = Math.max(0, stepX - first.width);
+        const gapY = Math.max(0, stepY - first.height);
+
+        if (
+          clientX < first.left - gapX / 2 ||
+          clientY < first.top - gapY / 2 ||
+          clientX > last.right + gapX / 2 ||
+          clientY > last.bottom + gapY / 2
+        ) return null;
+
+        const col = Math.floor((clientX - first.left + gapX / 2) / stepX);
+        const row = Math.floor((clientY - first.top + gapY / 2) / stepY);
+        if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) return null;
+        return indexOf(row, col);
+      }
+
+      function areaOfRect(rect) {
+        return rect.h * rect.w;
+      }
+
+      function rowOf(index) {
+        return Math.floor(index / SIZE);
+      }
+
+      function colOf(index) {
+        return index % SIZE;
+      }
+
+      function indexOf(row, col) {
+        return row * SIZE + col;
+      }
+
+      function weightedPick(items, weightFn) {
+        const weights = items.map(item => Math.max(0.0001, Number(weightFn(item)) || 0.0001));
+        const total = weights.reduce((sum, weight) => sum + weight, 0);
+        let cursor = Math.random() * total;
+        for (let i = 0; i < items.length; i += 1) {
+          cursor -= weights[i];
+          if (cursor <= 0) return items[i];
+        }
+        return items[items.length - 1];
+      }
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function setStatus(text) {
+        els.statusText.textContent = text;
+      }
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        els.toast.textContent = message;
+        els.toast.classList.add("show");
+        toastTimer = window.setTimeout(() => els.toast.classList.remove("show"), 1600);
+      }
+
+      function shakeBoard() {
+        els.board.classList.remove("shake");
+        void els.board.offsetWidth;
+        els.board.classList.add("shake");
+      }
+
+      function haptic(pattern) {
+        try {
+          if (navigator.vibrate) navigator.vibrate(pattern);
+        } catch (_) {}
+      }
+
+      function showHelp() {
+        els.helpSheet.hidden = false;
+      }
+
+      function hideHelp() {
+        els.helpSheet.hidden = true;
+      }
+
+      function showWin() {
+        els.winSheet.hidden = false;
+      }
+
+      function hideWin() {
+        els.winSheet.hidden = true;
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
