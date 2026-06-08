@@ -1,4 +1,4 @@
-# zhudaandzuher.github.io
+# zhudaandzhuer.github.io
 
 這是我的 GitHub Pages 首頁專案。
 
@@ -11,4 +11,4 @@
 
 ## 網站連結
 
-- https://zhudaandzuher.github.io/
+- https://zhudaandzhuer.github.io/
