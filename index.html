@@ -61,57 +61,84 @@
       border-bottom: 1px solid rgba(23, 58, 83, .12);
     }
 
-    .toolbar button {
-      border: 1px solid rgba(23, 58, 83, .24);
-      background: #fff;
-      color: var(--ink);
-      border-radius: 999px;
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      font: 700 16px/1 var(--font);
-      cursor: pointer;
-      box-shadow: 0 6px 15px rgba(22, 39, 54, .08);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform .15s ease, border-color .15s ease;
-    }
-
-    .toolbar button:hover,
-    .toolbar button:focus-visible {
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      outline: none;
-    }
-
-    .toolbar .primary {
-      background: var(--navy);
-      color: #fff;
-      border-color: var(--navy);
-    }
-
     .toolbar a {
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(23, 58, 83, .24);
-      border-radius: 999px;
-      background: var(--navy);
-      color: #fff;
+      width: 88px;
+      height: 88px;
+      border: 2px solid rgba(23, 58, 83, .2);
+      border-radius: 50%;
+      background: #fff;
+      color: inherit;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      font: 700 16px/1 var(--font);
-      box-shadow: 0 6px 15px rgba(22, 39, 54, .08);
-      transition: transform .15s ease, border-color .15s ease, background-color .15s ease;
+      box-shadow: 0 10px 24px rgba(22, 39, 54, .15);
+      overflow: hidden;
+      padding: 0;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
     }
 
     .toolbar a:hover,
     .toolbar a:focus-visible {
       transform: translateY(-1px);
       border-color: var(--accent);
+      box-shadow: 0 14px 24px rgba(22, 39, 54, .2);
       outline: none;
+    }
+
+    .toolbar .game-entry {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .toolbar .game-entry-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+      white-space: nowrap;
+    }
+
+    .toolbar .game-entry-wrap {
+      position: relative;
+      width: 88px;
+      height: 88px;
+    }
+
+    .toolbar .game-entry-wrap:hover {
+      text-decoration: none;
+    }
+
+    .toolbar .game-entry-wrap::after {
+      content: "豬大與豬二世界";
+      position: absolute;
+      inset: auto 6px 4px 6px;
+      padding: 2px 0;
+      background: rgba(0, 0, 0, .5);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+      letter-spacing: .02em;
+      pointer-events: none;
+    }
+
+    .toolbar .game-entry-wrap {
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #f3f3f3 60%, #dedede 100%);
     }
 
     .sheet {
@@ -545,19 +572,20 @@
   </style>
 </head>
 <body>
-  <div class="toolbar" aria-label="Resume actions">
-      <a
-        href="https://zhudaandzhuer.github.io/myGames/0001-PixelWorld/index.html"
-        target="_blank"
-        rel="noopener"
-        title="前往 PixelWorld 遊戲"
-        aria-label="前往 PixelWorld 遊戲">
-        🎮
-      </a>
-      <button type="button" class="primary" id="editToggle" title="開啟編輯模式" aria-label="開啟編輯模式">✏️</button>
-      <button type="button" id="downloadHtml" title="下載目前版本 HTML" aria-label="下載目前版本 HTML">⬇️</button>
-      <button type="button" id="printPdf" title="列印 / 另存 PDF" aria-label="列印 / 另存 PDF">🖨️</button>
-      <button type="button" id="resetResume" title="還原範例內容" aria-label="還原範例內容">↩️</button>
+  <div class="toolbar" aria-label="Game entry">
+    <a
+      class="game-entry-wrap"
+      href="https://zhudaandzhuer.github.io/myGames/0001-PixelWorld/index.html"
+      target="_blank"
+      rel="noopener"
+      title="前往 PixelWorld 遊戲"
+      aria-label="前往 PixelWorld 遊戲">
+      <img
+        class="game-entry"
+        src="./myGames/0001-PixelWorld/images/zhuda-zhuer-favicon-256.png"
+        alt="">
+      <span class="game-entry-label">前往 PixelWorld 單機版</span>
+    </a>
   </div>
 
   <main class="sheet">
@@ -733,17 +761,13 @@
   </main>
 
   <div class="editing-tip" role="status" aria-live="polite">
-    編輯模式已開啟：可直接點文字修改。電話、Email、地址、網站文字變更後，連結會自動同步；完成後可下載目前版本或列印成 PDF。
+    點選上方遊戲按鈕可進入「豬大與豬二世界」單機展示頁。
   </div>
 
   <script>
     (() => {
       const STORAGE_KEY = "single-file-resume-template-current";
       const resume = document.getElementById("resume");
-      const editToggle = document.getElementById("editToggle");
-      const downloadHtml = document.getElementById("downloadHtml");
-      const printPdf = document.getElementById("printPdf");
-      const resetResume = document.getElementById("resetResume");
       const originalResumeHtml = resume.innerHTML;
       let isEditing = false;
       let saveTimer = null;
@@ -812,26 +836,7 @@
           node.setAttribute("contenteditable", isEditing ? "true" : "false");
           node.setAttribute("spellcheck", "true");
         });
-        editToggle.textContent = isEditing ? "關閉編輯模式" : "開啟編輯模式";
         if (!isEditing) persistResume();
-      }
-
-      function downloadCurrentHtml() {
-        persistResume();
-        const wasEditing = isEditing;
-        setEditing(false);
-        const html = `<!doctype html>\n${document.documentElement.outerHTML}`;
-        const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        const nameText = document.querySelector(".name")?.textContent.trim().replace(/\s+/g, "-").toLowerCase() || "resume";
-        a.href = url;
-        a.download = `${nameText}-resume.html`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        if (wasEditing) setEditing(true);
       }
 
       function restoreSavedResume() {
@@ -848,23 +853,6 @@
         if (!isEditing) return;
         const link = event.target.closest("a");
         if (link) event.preventDefault();
-      });
-
-      editToggle.addEventListener("click", () => setEditing(!isEditing));
-      downloadHtml.addEventListener("click", downloadCurrentHtml);
-      printPdf.addEventListener("click", () => {
-        persistResume();
-        setEditing(false);
-        window.print();
-      });
-
-      resetResume.addEventListener("click", () => {
-        const ok = window.confirm("確定要還原範例內容？目前已編輯的內容會從本機暫存移除。");
-        if (!ok) return;
-        safeStorageRemove(STORAGE_KEY);
-        resume.innerHTML = originalResumeHtml;
-        syncLinks();
-        setEditing(false);
       });
 
       window.addEventListener("beforeprint", () => {
