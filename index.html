@@ -687,7 +687,7 @@
             <div class="reference-card">
               <h3 data-edit="true">PixelWorld</h3>
               <div class="position" data-edit="true">第一款獨立展示作品（GitHub Pages）</div>
-              <p><strong>Link</strong>：<a data-link="web" href="./myGames/0001-PixelWorld/index.html"><span class="link-text" data-edit="true">myGames/0001-PixelWorld/</span></a></p>
+              <p><strong>Link</strong>：<a data-link="web" href="https://zhudaandzhuer.github.io/myGames/0001-PixelWorld/index.html"><span class="link-text" data-edit="true">https://zhudaandzhuer.github.io/myGames/0001-PixelWorld/</span></a></p>
             </div>
           </div>
         </section>
@@ -732,6 +732,7 @@
         const trimmed = value.trim();
         if (!trimmed) return "#";
         if (/^(https?:)?\/\//i.test(trimmed)) return trimmed.startsWith("//") ? `https:${trimmed}` : trimmed;
+        if (/^[./]/.test(trimmed)) return trimmed;
         return `https://${trimmed}`;
       }
 
