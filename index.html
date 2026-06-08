@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>趙敬瑋 履歷 | Resume</title>
+    <meta
+      name="description"
+      content="趙敬瑋的個人履歷 - 前端遊戲開發（Egret / Unity / LayaAir / TypeScript）"
+    />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121a33;
+        --text: #e9eef9;
+        --muted: #a9b4d0;
+        --accent: #6ec1ff;
+        --line: #2a3560;
+        --tag: #1f2a50;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+        background: radial-gradient(circle at top, #172246 0%, var(--bg) 45%);
+        color: var(--text);
+        line-height: 1.65;
+      }
+      .resume {
+        max-width: 900px;
+        margin: 28px auto;
+        padding: 22px;
+        background: rgba(15, 22, 45, 0.86);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+      .header {
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px dashed var(--line);
+        padding-bottom: 16px;
+      }
+      .name {
+        font-size: 2rem;
+        margin: 0;
+        letter-spacing: 0.5px;
+      }
+      .subtitle {
+        margin: 8px 0 0;
+        color: var(--muted);
+      }
+      .contact {
+        text-align: right;
+      }
+      .contact a {
+        display: block;
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .section {
+        margin-top: 22px;
+      }
+      .section-title {
+        font-size: 1.1rem;
+        color: var(--accent);
+        border-left: 4px solid var(--accent);
+        padding-left: 10px;
+        margin-bottom: 10px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+        margin: 10px 0;
+      }
+      .tagline {
+        color: #d4defb;
+        margin: 0;
+      }
+      .meta {
+        color: var(--muted);
+        margin: 2px 0 0;
+      }
+      ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+      li {
+        margin: 6px 0;
+      }
+      .pill {
+        display: inline-block;
+        padding: 3px 10px;
+        margin: 3px 6px 0 0;
+        background: var(--tag);
+        border-radius: 999px;
+        font-size: 0.86rem;
+        color: #d8e5ff;
+      }
+      .jobs {
+        display: grid;
+        gap: 12px;
+      }
+      .job-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .job-title {
+        font-weight: 700;
+      }
+      .job-time {
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .toolbar {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .toolbar a {
+        display: inline-block;
+        padding: 8px 12px;
+        background: var(--accent);
+        color: #081022;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .toolbar span {
+        opacity: 0.7;
+        color: var(--muted);
+        line-height: 38px;
+      }
+      @media (max-width: 700px) {
+        .header {
+          flex-direction: column;
+        }
+        .contact {
+          text-align: left;
+        }
+        .resume {
+          margin: 10px;
+          padding: 16px;
+        }
+      }
+      @media print {
+        body {
+          background: white;
+          color: #111;
+        }
+        .resume {
+          border: none;
+          box-shadow: none;
+          background: white;
+        }
+        .card,
+        .section-title,
+        .pill,
+        .toolbar {
+          background: #fff;
+          color: #111;
+          border-color: #ddd;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="resume">
+      <header class="header">
+        <div>
+          <h1 class="name">趙敬瑋</h1>
+          <p class="subtitle">前端遊戲客戶端工程師 / Frontend Game Client Engineer</p>
+          <p class="meta">
+            專長：TypeScript、LayaAir 3.3.x、FairyGUI、Unity、Lua、Egret，5 年遊戲開發與架構整合經驗
+          </p>
+        </div>
+        <div class="contact">
+          <a href="mailto:cs.chaochingwei@gmail.com">Email: cs.chaochingwei@gmail.com</a>
+          <a href="https://github.com/zhudaandzhuer">GitHub: zhudaandzhuer</a>
+          <a href="#">LinkedIn: 趙敬瑋</a>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="section-title">個人簡介</div>
+        <div class="card">
+          <p class="tagline">
+            前端遊戲工程師，具備 5 年開發經驗，專長於現有專案維運、架構遷移與流程優化。
+            先後參與 Egret 舊專案維護，之後加入 Unity 團隊負責 Unity + Lua 開發（含遊戲大廳與黑傑克遊戲），
+            再回到 H5 使用 Egret 開發小遊戲，後續執行 Egret 到 Laya 的全面搬移。
+            目前持續架設 AI Agent，完善工作流程，提升開發效率與專注力，並用更全面的角度進行遊戲審視與品質控管。
+          </p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">核心技能</div>
+        <div class="card">
+          <div>
+            <span class="pill">TypeScript</span>
+            <span class="pill">JavaScript</span>
+            <span class="pill">LayaAir 3.3.x</span>
+            <span class="pill">FairyGUI</span>
+            <span class="pill">Photon WebSocket</span>
+            <span class="pill">Unity</span>
+            <span class="pill">Lua</span>
+            <span class="pill">Egret</span>
+            <span class="pill">UI Contract / Signal</span>
+            <span class="pill">Node.js</span>
+            <span class="pill">Playwright</span>
+            <span class="pill">Git</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">專案經歷</div>
+        <div class="jobs">
+          <div class="card">
+            <div class="job-header">
+              <div class="job-title">BDL LayaAirClient 多遊戲客戶端（核心專案）</div>
+              <div class="job-time">約 5 年</div>
+            </div>
+            <p class="meta">技術棧：LayaAir 3.3.11、TypeScript、FairyGUI、Photon、Node.js</p>
+            <ul>
+              <li>負責主啟動與分包載入流程（app 設定、資源版本、分包核心/皮膚/伺服器 ID 映射）。</li>
+              <li>維護共用流程骨架：Startup、GameCommon、GameCustom 三層分工，降低不同遊戲間重複代碼。</li>
+              <li>建立與維護 Signal 狀態中心，搭配 listener 清理機制，提升 runtime 生命周期穩定性。</li>
+              <li>實作與協作 layout/viewport 相容邏輯，改善行動裝置方向切換與畫面穩定度。</li>
+              <li>導入資源清理與重啟安全流程，降低場景切換與重複進入時的殘留風險。</li>
+              <li>配合 smoke 測試、api test 與 log server，提升問題重現與回歸效率。</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="job-header">
+              <div class="job-title">推筒子 / 象棋麻將整合與 Laya-first 遊戲接軌</div>
+              <div class="job-time">進行中</div>
+            </div>
+            <p class="meta">技術棧：LayaAir 3.3.x、TypeScript、FairyGUI</p>
+            <ul>
+              <li>參與 Laya-first 遊戲接入共用殼流程，保留既有登入、進房、資源版本、桌況流程一致性。</li>
+              <li>整合語系與 WebView 導流，提升跨裝置導覽一致性與用戶體驗。</li>
+              <li>透過資料導向設定降低硬編碼，提升新遊戲接入的擴展性。</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="job-header">
+              <div class="job-title">AI Agent 工作流程優化專案</div>
+              <div class="job-time">持續進行</div>
+            </div>
+            <p class="meta">技術棧：TypeScript、Node.js、Playwright</p>
+            <ul>
+              <li>建立 AI 輔助任務流程，提升需求澄清、除錯與交付效率。</li>
+              <li>強化工作專注力管理，讓開發可從修 Bug 切換到系統性流程審視。</li>
+              <li>建立可重複運用的檢核模板，縮短多人協作時的溝通成本。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">工作經歷</div>
+        <div class="card">
+          <ul>
+            <li>新人階段：參與 Egret 舊專案維護，負責功能維修與穩定性改善。</li>
+            <li>Unity 團隊：負責 Unity + Lua 專案，開發遊戲大廳與黑傑克玩法。</li>
+            <li>H5階段：回到 H5 使用 Egret 開發小遊戲，累積產品化交付經驗。</li>
+            <li>架構轉型：主導「Egret to Laya」全面搬移，建立新架構整合能力。</li>
+            <li>持續精進：導入 AI Agent，提升開發效率並將審視面向從局部問題轉為全局流程。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">學歷</div>
+        <div class="card">
+          <p>淡江大學｜資工系研究所畢業（2019 ~ 2021）</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">English Summary</div>
+        <div class="card">
+          <p class="tagline">
+            Frontend game client engineer with 5 years of experience in game product development and architecture evolution.
+            Experienced in maintaining legacy Egret projects, building Unity + Lua gameplay systems (lobby and blackjack), and migrating from Egret to Laya.
+            Currently designing AI-powered assistants to improve development efficiency, review quality flow from a broader perspective, and strengthen release stability.
+          </p>
+        </div>
+      </section>
+
+      <div class="toolbar">
+        <a href="#">下載 PDF（可用瀏覽器列印為 PDF）</a>
+        <span>下一步：若要我幫你改成 1 頁精簡版 + ATS 友善版，我可以直接再整理。</span>
+      </div>
+    </main>
+  </body>
+</html>
