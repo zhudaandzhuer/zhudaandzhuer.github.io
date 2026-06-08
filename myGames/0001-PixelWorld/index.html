@@ -3,20 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PixelWorld 作品展示（單機版）</title>
+  <title>PixelWorld 單機互動 Demo</title>
   <link rel="icon" type="image/x-icon" href="./favicon.ico" />
   <link rel="icon" type="image/png" sizes="256x256" href="./images/zhuda-zhuer-favicon-256.png" />
   <style>
     :root {
-      --bg1: #0f1221;
-      --bg2: #1d2740;
-      --paper: rgba(20, 28, 46, 0.9);
-      --text: #e9f1ff;
-      --muted: #a9b9d7;
-      --line: rgba(196, 213, 255, 0.18);
-      --accent: #6ec8ff;
-      --shadow: 0 18px 45px rgba(0, 8, 28, 0.45);
+      --bg1: #0b1022;
+      --bg2: #131e3c;
+      --bg-panel: rgba(12, 20, 44, 0.82);
+      --line: rgba(174, 203, 255, 0.2);
+      --text: #e8f2ff;
+      --muted: #a8bad8;
+      --accent: #70e1ff;
+      --good: #72ffc2;
+      --warn: #ffd97a;
+      --bad: #ff8ea3;
       --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --shadow: 0 18px 40px rgba(2, 8, 26, 0.46);
     }
 
     * { box-sizing: border-box; }
@@ -28,205 +31,785 @@
 
     body {
       min-height: 100vh;
-      color: var(--text);
       font-family: var(--font);
+      color: var(--text);
       background:
-        radial-gradient(80% 80% at 15% 20%, rgba(110, 200, 255, 0.15), transparent 50%),
-        radial-gradient(60% 60% at 85% 80%, rgba(148, 100, 255, 0.18), transparent 40%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
-      display: grid;
-      place-items: center;
-      padding: 26px;
+        radial-gradient(75% 75% at 20% 15%, rgba(112, 225, 255, 0.16), transparent 52%),
+        radial-gradient(75% 75% at 80% 85%, rgba(123, 95, 255, 0.16), transparent 48%),
+        linear-gradient(165deg, var(--bg1), var(--bg2));
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 18px;
     }
 
-    .panel {
-      width: min(980px, 100%);
-      background: var(--paper);
+    .frame {
+      width: min(1120px, 100%);
       border: 1px solid var(--line);
       border-radius: 22px;
+      padding: 16px;
+      background: var(--bg-panel);
       box-shadow: var(--shadow);
-      padding: clamp(18px, 3vw, 34px);
-      backdrop-filter: blur(5px);
-      overflow: hidden;
+      backdrop-filter: blur(6px);
       position: relative;
+      overflow: hidden;
     }
 
-    .panel::after {
+    .frame::after {
       content: "";
       position: absolute;
       inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.05) 45%, transparent 46%);
       pointer-events: none;
-      background:
-        radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.08), transparent 45%);
-      opacity: 0.55;
+      opacity: .25;
+      mix-blend-mode: screen;
     }
 
-    .content {
+    header {
       position: relative;
       z-index: 1;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      color: #c8d8f7;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--line);
+      margin-bottom: 12px;
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: clamp(28px, 4vw, 46px);
-      line-height: 1.12;
+      margin: 0;
+      font-size: clamp(1.7rem, 3.2vw, 2.4rem);
       letter-spacing: 0.01em;
     }
 
-    p {
-      margin: 8px 0;
+    .sub {
+      margin-top: 6px;
       color: var(--muted);
-      line-height: 1.7;
-      max-width: 68ch;
-    }
-
-    .meta {
-      margin: 18px 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .pill {
-      padding: 9px 12px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: rgba(4, 8, 21, 0.35);
       font-size: 13px;
     }
 
-    .actions {
+    .grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr minmax(260px, 320px);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .game-wrap {
+      background: rgba(6, 10, 24, 0.9);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      padding: 12px;
+      min-height: 520px;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 10px;
-      margin: 22px 0 14px;
     }
 
-    a.btn {
-      padding: 12px 16px;
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 8px 10px;
+      background: rgba(13, 20, 47, 0.6);
+      min-height: 48px;
+    }
+
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .bad { color: var(--bad); }
+
+    .hud-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    canvas {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 1px solid var(--line);
+      background: #0a1024;
       border-radius: 12px;
-      font-weight: 600;
-      text-decoration: none;
-      border: 1px solid transparent;
-      transition: transform .18s ease, border-color .18s ease;
+      display: block;
     }
 
-    a.btn:hover,
-    a.btn:focus-visible {
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      outline: none;
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .btn-primary {
-      background: linear-gradient(180deg, #6ec8ff, #4b9ef6);
-      color: #03203a;
-    }
-
-    .btn-ghost {
+    button {
+      border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.03);
       color: var(--text);
-      border-color: var(--line);
-    }
-
-    .preview {
-      border: 1px solid var(--line);
-      margin-top: 18px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #050910;
-      position: relative;
-    }
-
-    .preview img {
-      width: 100%;
-      display: block;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-    }
-
-    .caption {
-      padding: 12px;
-      color: #ccdef3;
+      font-family: inherit;
+      border-radius: 10px;
+      padding: 8px 12px;
       font-size: 13px;
-      border-top: 1px solid var(--line);
-      background: rgba(8, 14, 32, 0.72);
+      cursor: pointer;
+      transition: transform .15s ease;
     }
 
-    .tip {
-      margin-top: 16px;
-      font-size: 12px;
-      color: #c3cfeb;
-      padding: 10px 12px;
+    button:hover,
+    button:focus-visible { transform: translateY(-1px); }
+
+    .primary {
+      border-color: rgba(112, 225, 255, 0.55);
+      background: linear-gradient(180deg, rgba(112, 225, 255, 0.3), rgba(112, 225, 255, 0.08));
+      color: #04233d;
+      font-weight: 700;
+    }
+
+    .aside {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(12, 19, 43, 0.72);
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .panel p {
+      margin: 6px 0;
+      line-height: 1.6;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .inventory {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .slot {
       border: 1px dashed var(--line);
       border-radius: 10px;
-      background: rgba(14, 22, 40, 0.55);
+      padding: 8px;
+      background: rgba(8, 13, 28, 0.7);
+      min-height: 56px;
     }
 
-    @media (max-width: 680px) {
-      .actions {
-        flex-direction: column;
-      }
+    .slot strong {
+      color: #dcecff;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
 
-      .btn {
-        width: 100%;
-        text-align: center;
-      }
+    .slot .value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .log {
+      max-height: 150px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      background: rgba(7, 12, 28, 0.65);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .log-line + .log-line { margin-top: 6px; }
+
+    .badge {
+      display: inline-flex;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 11px;
+      margin-right: 6px;
+      color: #b7d0f0;
+    }
+
+    .link-area {
+      display: grid;
+      gap: 8px;
+    }
+
+    .link-area a {
+      color: #c5f0ff;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 13px;
+    }
+
+    .touch { display: none; gap: 10px; margin-top: 8px; }
+    .touch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .touch button {
+      padding: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 960px) {
+      .grid { grid-template-columns: 1fr; }
+      .touch { display: grid; }
+      .hud { grid-template-columns: 1fr; }
+      .aside { grid-template-columns: repeat(2, minmax(0, 1fr)); display: grid; }
+    }
+
+    @media (max-width: 660px) {
+      body { padding: 10px; }
+      .frame { padding: 12px; }
+      .aside { grid-template-columns: 1fr; }
+      .touch-grid { grid-template-columns: repeat(3, 1fr); }
+      .touch button { padding: 14px 8px; }
     }
   </style>
 </head>
 <body>
-  <main class="panel">
-    <section class="content">
-      <div class="badge">PixelWorld · 作品展示（單機版）</div>
-      <h1>豬大與豬二世界｜作品前端展示</h1>
-      <p>
-        這是為 GitHub Pages 設計的 <strong>單機展示入口</strong>，主要用來直接展示前端整體介面與資源組件。若需多人真實流程，請切到「進入多人原版」，會導向原始前端頁面。
-      </p>
-      <div class="meta">
-        <span class="pill">TypeScript + WebSocket 串接</span>
-        <span class="pill">LayaAir / Canvas 場景渲染</span>
-        <span class="pill">獨立前端資源可直接放到 GitHub Pages</span>
+  <section class="frame">
+    <header>
+      <div>
+        <h1>PixelWorld 單機互動 Demo</h1>
+        <div class="sub">這是「本地可運行」版本：不依賴 API / WebSocket，直接在 GitHub Pages 展示前端能力。</div>
       </div>
+      <div class="sub">操作：WASD 或方向鍵／手機可用螢幕按鈕</div>
+    </header>
 
-      <div class="actions">
-        <a class="btn btn-primary" href="#" id="launchDemo">開啟單機介紹面板</a>
-        <a class="btn btn-ghost" href="lobby-online.html">進入多人原版（需後端）</a>
-        <a class="btn btn-ghost" href="game.html?room=public-survival&language=tw">直接測試遊戲頁（原版載入）</a>
-      </div>
+    <div class="grid">
+      <main>
+        <section class="game-wrap">
+          <div class="hud">
+            <div class="card">
+              <div class="hud-label">玩家</div>
+              <div>HP: <span id="hp">100</span> / 100 | 夜晚值: <span id="time">00:00</span></div>
+            </div>
+            <div class="card">
+              <div class="hud-label">目標</div>
+              <div id="goal" class="warn">採集全部木材後，建造兩個木箱離開。</div>
+            </div>
+            <div class="card">
+              <div class="hud-label">動作提示</div>
+              <div id="tip">按 <span class="badge">空白鍵</span> / <span class="badge">互動</span> 拾取、建造</div>
+            </div>
+          </div>
 
-      <div class="preview">
-        <img src="./images/zhuda-loading.webp" alt="PixelWorld 封面預覽" />
-        <div class="caption">預覽圖為前端載入畫面資源，點選下方「進入多人原版（需後端）」可直接開啟原版入口。</div>
-      </div>
+          <canvas id="world" width="960" height="540" aria-label="PixelWorld Demo"></canvas>
 
-      <div class="tip">
-        建議你上傳前先確認 <code>myGames/0001-PixelWorld/lobby-online.html</code> 保持原樣；若之後要加完整的前端互動 Demo，我可以再補上「純前端假 API」版本。
-      </div>
-    </section>
-  </main>
+          <div class="controls">
+            <button id="btnRestart" class="primary">重新開始</button>
+            <button id="btnAuto">切換自動演示</button>
+            <button id="btnNight">日夜切換</button>
+            <button id="btnMine">建造木箱 (x1 木材)</button>
+          </div>
+
+          <div class="touch">
+            <div class="touch-grid">
+              <span></span>
+              <button data-dir="up">⬆</button>
+              <span></span>
+              <button data-dir="left">⬅</button>
+              <button data-act="action">拾取/放置</button>
+              <button data-dir="right">➡</button>
+              <span></span>
+              <button data-dir="down">⬇</button>
+              <span></span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="aside">
+        <section class="panel">
+          <h2>資源 / 背包</h2>
+          <div class="inventory" id="inventory"></div>
+        </section>
+
+        <section class="panel">
+          <h2>互動事件</h2>
+          <div class="log" id="log"></div>
+        </section>
+
+        <section class="panel">
+          <h2>說明</h2>
+          <p>你會在 2D 像素世界裡探索，踩在草地上可順利行走；撞到岩石不能通過。走到資源旁邊按空白鍵可以採集，拿到木頭後可建造木箱（需要2木頭）。</p>
+          <p>這個展示版可直接在 <code>GitHub Pages</code> 運行，顯示你「可控制、可玩、可回饋」的前端實作能力。</p>
+        </section>
+
+        <section class="panel">
+          <h2>連結</h2>
+          <div class="link-area">
+            <a href="lobby-online.html">進入多人原版（需後端）</a>
+            <a href="game.html?room=public-survival&language=tw">原始 game.html（展示載入）」</a>
+            <a href="./">回到作品資料夾</a>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </section>
 
   <script>
-    const demoBtn = document.getElementById("launchDemo");
-    demoBtn.addEventListener("click", (event) => {
-      event.preventDefault();
-      alert("這個單機展示版目前提供作品預覽與進入點。若你想，我可以再幫你改成『點擊卡片後切到可操作的小遊戲 UI』版。");
-    });
+    (() => {
+      const canvas = document.getElementById('world');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const GRID = 28;
+      const COLS = Math.floor(w / GRID);
+      const ROWS = Math.floor(h / GRID);
+      const TILE = {
+        grass: '#3f8a4c',
+        dirt: '#7a5a36',
+        stone: '#6a6d72',
+        tree: '#2f5d36',
+        water: '#3b77d4',
+        chest: '#f0be5d',
+        crate: '#8f7359',
+      };
+
+      const player = {
+        x: 9,
+        x2: 9,
+        y: 9,
+        speed: 0.12,
+        vx: 0,
+        vy: 0,
+        hp: 100,
+      };
+
+      let map = [];
+      let crates = [];
+      let frame = 0;
+      let nightMode = false;
+      let autoPlay = false;
+      const inventory = {
+        木材: 0,
+        藥水: 1,
+        石塊: 0,
+      };
+      const goal = { woodNeed: 2, crafted: 0 };
+      let logLines = [];
+      const msg = (text, type = 'info') => {
+        logLines.unshift({ text, type, t: Date.now() });
+        if (logLines.length > 50) logLines.length = 50;
+        renderLog();
+      };
+
+      const tileKinds = ['grass', 'grass', 'grass', 'dirt', 'water'];
+      const trees = new Set();
+      const stones = new Set();
+
+      const toKey = (x, y) => `${x},${y}`;
+      const neighbors = [
+        [0, -1], [1, 0], [-1, 0], [0, 1]
+      ];
+
+      function resetWorld() {
+        map = [];
+        trees.clear();
+        stones.clear();
+        crates = [];
+        player.x = Math.floor(COLS / 3);
+        player.y = Math.floor(ROWS / 2);
+        player.vx = 0;
+        player.vy = 0;
+        player.hp = 100;
+        frame = 0;
+        goal.woodNeed = 2;
+        goal.crafted = 0;
+        inventory.木材 = 0;
+        inventory.石塊 = 0;
+        inventory.藥水 = 1;
+        for (let y = 0; y < ROWS; y++) {
+          map[y] = [];
+          for (let x = 0; x < COLS; x++) {
+            let v;
+            if (x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1) {
+              v = 'stone';
+            } else {
+              const noise = Math.sin(x * 0.65) + Math.cos(y * 0.73) + (Math.random() * 0.6 - 0.3);
+              if (y > ROWS * 0.75) v = 'water';
+              else if (noise > 1.0) v = 'dirt';
+              else v = tileKinds[(Math.random() * tileKinds.length) | 0];
+            }
+            map[y][x] = v;
+            if (v === 'grass' && Math.random() < 0.03) {
+              trees.add(toKey(x, y));
+            }
+            if (v === 'dirt' && Math.random() < 0.012) {
+              stones.add(toKey(x, y));
+            }
+          }
+        }
+
+        // 置放寶箱與石塊作為目標互動物件
+        crates = [
+          { x: Math.min(COLS - 3, Math.max(3, Math.floor(Math.random() * COLS))),
+            y: Math.min(ROWS - 3, Math.max(3, Math.floor(Math.random() * ROWS)) ),
+            type: '木箱',
+            collected: false,
+            color: TILE.chest,
+          },
+        ];
+
+        msg('世界重新生成完成，拾取木材再建造木箱吧。', 'good');
+        updateGoal();
+        renderInventory();
+      }
+
+      const keyState = new Set();
+
+      function keyNameToDir(name) {
+        if (['ArrowUp', 'w', 'W'].includes(name)) return [0, -1];
+        if (['ArrowDown', 's', 'S'].includes(name)) return [0, 1];
+        if (['ArrowLeft', 'a', 'A'].includes(name)) return [-1, 0];
+        if (['ArrowRight', 'd', 'D'].includes(name)) return [1, 0];
+        return [0, 0];
+      }
+
+      function canWalk(x, y) {
+        if (x <= 0 || y <= 0 || x >= COLS - 1 || y >= ROWS - 1) return false;
+        const t = map[y][x];
+        if (t === 'water' || t === 'stone') return false;
+        return true;
+      }
+
+      function keyMove(delta) {
+        let dx = 0;
+        let dy = 0;
+        if (keyState.has('ArrowUp') || keyState.has('w') || keyState.has('W')) dy -= 1;
+        if (keyState.has('ArrowDown') || keyState.has('s') || keyState.has('S')) dy += 1;
+        if (keyState.has('ArrowLeft') || keyState.has('a') || keyState.has('A')) dx -= 1;
+        if (keyState.has('ArrowRight') || keyState.has('d') || keyState.has('D')) dx += 1;
+        if (dx === 0 && dy === 0) return;
+
+        const nx = player.x + Math.sign(dx);
+        const ny = player.y + Math.sign(dy);
+        if (canWalk(nx, ny)) {
+          player.x = nx;
+          player.y = ny;
+          player.x2 = nx;
+          player.y2 = ny;
+        } else {
+          player.vx = Math.max(0, player.vx - 1);
+          msg('該位置不可通行（岩石或水域）', 'warn');
+        }
+      }
+
+      function adjacentHasTreeOrStone() {
+        for (const [ox, oy] of neighbors) {
+          const nx = player.x + ox;
+          const ny = player.y + oy;
+          const key = toKey(nx, ny);
+          if (trees.has(key) && map[ny]?.[nx]) return { kind: 'tree', key, x: nx, y: ny };
+          if (stones.has(key) && map[ny]?.[nx]) return { kind: 'stone', key, x: nx, y: ny };
+        }
+        return null;
+      }
+
+      function tryInteract() {
+        const chest = crates.find(c => Math.abs(c.x - player.x) + Math.abs(c.y - player.y) === 1 && !c.collected);
+        if (chest) {
+          if (inventory.木材 >= 2) {
+            chest.collected = true;
+            inventory.木材 -= 2;
+            goal.crafted += 1;
+            msg('你建造了一個木箱，世界有了可回收目標。', 'good');
+            updateGoal();
+            renderInventory();
+            return;
+          }
+          msg('木箱還差木材（需2木材）', 'warn');
+          return;
+        }
+
+        const target = adjacentHasTreeOrStone();
+        if (target) {
+          if (target.kind === 'tree') {
+            trees.delete(target.key);
+            map[target.y][target.x] = 'dirt';
+            inventory.木材 += 1;
+            msg('你砍倒一棵樹，獲得1 木材。', 'good');
+            renderInventory();
+            updateGoal();
+            return;
+          }
+          if (target.kind === 'stone') {
+            stones.delete(target.key);
+            map[target.y][target.x] = 'dirt';
+            inventory.石塊 += 1;
+            msg('你採到1 個石塊。', 'good');
+            renderInventory();
+            return;
+          }
+        }
+
+        msg('站在資源旁邊可採集，或站到木箱旁可建造。', 'info');
+      }
+
+      function updateGoal() {
+        const targetEl = document.getElementById('goal');
+        const ok = goal.crafted >= 1;
+        if (ok) {
+          targetEl.textContent = '目標達成：你已建造木箱，返回木頭樹林區可繼續探索。';
+          targetEl.className = 'good';
+        } else {
+          targetEl.textContent = `收集木材 ${inventory.木材}/${goal.woodNeed} 後建造1個木箱`;
+          targetEl.className = 'warn';
+        }
+      }
+
+      function renderInventory() {
+        const panel = document.getElementById('inventory');
+        panel.innerHTML = '';
+        Object.entries(inventory).forEach(([name, count]) => {
+          const el = document.createElement('div');
+          el.className = 'slot';
+          el.innerHTML = `<strong>${name}</strong><span class="value">${count}</span>`;
+          panel.appendChild(el);
+        });
+      }
+
+      function renderLog() {
+        const box = document.getElementById('log');
+        box.innerHTML = logLines.map((line) => {
+          const cls = line.type === 'good' ? 'good' : line.type === 'warn' ? 'warn' : 'muted';
+          const sec = ((Date.now() - line.t) / 1000).toFixed(0);
+          return `<div class="log-line"><span class="${cls}">[${sec}s]</span> ${line.text}</div>`;
+        }).join('');
+      }
+
+      function drawTile(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * GRID, y * GRID, GRID, GRID);
+      }
+
+      function drawWorld() {
+        const pulse = (Math.sin(frame * 0.08) + 1) * 0.5;
+        for (let y = 0; y < ROWS; y++) {
+          for (let x = 0; x < COLS; x++) {
+            drawTile(x, y, TILE[map[y][x]] || TILE.grass);
+          }
+        }
+
+        ctx.save();
+        for (const key of trees) {
+          const [x, y] = key.split(',').map(Number);
+          ctx.fillStyle = 'rgba(30, 95, 45, 0.95)';
+          ctx.fillRect(x * GRID + 4, y * GRID + 4, GRID - 8, GRID - 8);
+          ctx.fillStyle = '#6cf6a1';
+          ctx.beginPath();
+          ctx.ellipse(x * GRID + GRID / 2, y * GRID + GRID / 2 - 4, 7, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const key of stones) {
+          const [x, y] = key.split(',').map(Number);
+          ctx.fillStyle = '#b8bcc3';
+          ctx.fillRect(x * GRID + 5, y * GRID + 14, GRID - 10, GRID - 14);
+          ctx.fillStyle = '#6f7480';
+          ctx.fillRect(x * GRID + 8, y * GRID + 18, GRID - 16, 4);
+        }
+
+        for (const c of crates) {
+          if (c.collected) continue;
+          ctx.fillStyle = c.color;
+          ctx.fillRect(c.x * GRID + 6, c.y * GRID + 6, GRID - 12, GRID - 12);
+          ctx.fillStyle = '#3a2810';
+          ctx.fillText('木箱', c.x * GRID + 6, c.y * GRID + 18);
+        }
+
+        // player
+        const px = player.x * GRID;
+        const py = player.y * GRID;
+        const glow = 4 + pulse * 4;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.35 + pulse * 0.15})`;
+        ctx.arc(px + GRID / 2, py + GRID / 2 + 1, GRID / 2 + glow * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffd16a';
+        ctx.fillRect(px + 7, py + 2, GRID - 14, 9);
+        ctx.fillStyle = '#1f3e77';
+        ctx.fillRect(px + 9, py + 12, GRID - 18, 14);
+        ctx.fillStyle = '#0b1938';
+        ctx.fillRect(px + 12, py + 24, GRID - 24, 7);
+
+        // tiny goal area marker
+        const gx = Math.floor(COLS * 0.75);
+        const gy = Math.floor(ROWS * 0.18);
+        const markerPulse = 1 + Math.sin(frame * 0.15) * 0.1;
+        ctx.fillStyle = '#f4ff94';
+        ctx.globalAlpha = 0.75;
+        ctx.fillRect(gx * GRID + 6, gy * GRID + 6, GRID - 12, GRID - 12);
+        ctx.globalAlpha = 1;
+
+        if (nightMode) {
+          const shade = 'rgba(8, 11, 24, 0.55)';
+          ctx.fillStyle = shade;
+          ctx.fillRect(0, 0, w, h);
+        }
+
+        // UI on canvas
+        ctx.fillStyle = '#dff3ff';
+        ctx.font = 'bold 18px monospace';
+        ctx.fillText(`Time ${Math.floor((frame / 60) % 24).toString().padStart(2, '0')}:00`, 14, 24);
+      }
+
+      function tick() {
+        frame += 1;
+        const p = Math.sin(frame * 0.01);
+        if (autoPlay) {
+          if (frame % 12 === 0) {
+            const dirs = [
+              ['ArrowRight', 'ArrowRight', 'ArrowRight'],
+              ['ArrowDown', 'ArrowDown'],
+              ['ArrowRight', 'ArrowRight'],
+            ];
+            const choice = dirs[frame % dirs.length];
+            if (choice && choice.length) {
+              const c = choice[frame % choice.length];
+              keyState.add(c);
+              keyMove();
+              keyState.delete(c);
+            }
+          }
+        } else {
+          keyMove();
+        }
+
+        if (Math.random() < 0.003) {
+          const r = Math.random();
+          if (r < 0.4 && inventory.藥水 > 0) {
+            msg('你感應到遠處有聲音，先回到中心找答案。', 'info');
+          }
+        }
+
+        // health recovery / penalty only for demo feel
+        if (Math.floor(frame % 360) === 0) {
+          player.hp = Math.min(100, player.hp + 1);
+          document.getElementById('hp').textContent = player.hp;
+        }
+
+        document.getElementById('time').textContent = `${String(Math.floor((frame / 60) % 24)).padStart(2, '0')}:00`;
+        drawWorld();
+
+        requestAnimationFrame(tick);
+      }
+
+      function setupListeners() {
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space' || e.key === ' ') {
+            e.preventDefault();
+            tryInteract();
+            return;
+          }
+          keyState.add(e.key);
+        });
+
+        window.addEventListener('keyup', (e) => {
+          keyState.delete(e.key);
+        });
+
+        const touchButtons = document.querySelectorAll('.touch button');
+        touchButtons.forEach((btn) => {
+          const dir = btn.dataset.dir;
+          const act = btn.dataset.act;
+          const start = (ev) => {
+            ev.preventDefault();
+            if (dir) {
+              if (dir === 'up') {
+                keyState.add('ArrowUp');
+              }
+              if (dir === 'down') {
+                keyState.add('ArrowDown');
+              }
+              if (dir === 'left') {
+                keyState.add('ArrowLeft');
+              }
+              if (dir === 'right') {
+                keyState.add('ArrowRight');
+              }
+            }
+            if (act) {
+              tryInteract();
+            }
+          };
+          const end = () => {
+            if (!dir) return;
+            if (dir === 'up') keyState.delete('ArrowUp');
+            if (dir === 'down') keyState.delete('ArrowDown');
+            if (dir === 'left') keyState.delete('ArrowLeft');
+            if (dir === 'right') keyState.delete('ArrowRight');
+          };
+
+          btn.addEventListener('touchstart', start, { passive: false });
+          btn.addEventListener('touchend', end, { passive: false });
+          btn.addEventListener('mousedown', start);
+          btn.addEventListener('mouseup', end);
+          btn.addEventListener('mouseleave', end);
+        });
+
+        document.getElementById('btnRestart').addEventListener('click', () => {
+          resetWorld();
+          msg('重新開始一次。', 'good');
+        });
+
+        document.getElementById('btnNight').addEventListener('click', () => {
+          nightMode = !nightMode;
+          msg(`已切換為${nightMode ? '夜間' : '白天'}模式`, nightMode ? 'warn' : 'good');
+        });
+
+        document.getElementById('btnAuto').addEventListener('click', () => {
+          autoPlay = !autoPlay;
+          msg(autoPlay ? '開啟自動演示模式' : '關閉自動演示模式', autoPlay ? 'good' : 'info');
+        });
+
+        document.getElementById('btnMine').addEventListener('click', () => {
+          if (inventory.木材 > 0) {
+            inventory.木材 -= 1;
+            crates.push({ x: player.x + 1, y: player.y, type: '木箱', collected: false, color: TILE.crate });
+            msg('你消耗1木材放下一個臨時木箱。', 'good');
+            renderInventory();
+            return;
+          }
+          msg('沒有木材，先找樹採集。', 'bad');
+        });
+      }
+
+      resetWorld();
+      renderInventory();
+      renderLog();
+      setupListeners();
+      requestAnimationFrame(tick);
+    })();
   </script>
 </body>
 </html>
