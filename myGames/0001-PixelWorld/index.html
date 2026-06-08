@@ -1,815 +1,490 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PixelWorld 單機互動 Demo</title>
-  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
-  <link rel="icon" type="image/png" sizes="256x256" href="./images/zhuda-zhuer-favicon-256.png" />
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  >
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="preload" as="image" href="./images/zhuda-loading.webp" fetchpriority="high">
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <link rel="icon" type="image/png" sizes="256x256" href="./images/zhuda-zhuer-favicon-256.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180.png">
+  <title>豬大與豬二世界（單機版）</title>
   <style>
-    :root {
-      --bg1: #0b1022;
-      --bg2: #131e3c;
-      --bg-panel: rgba(12, 20, 44, 0.82);
-      --line: rgba(174, 203, 255, 0.2);
-      --text: #e8f2ff;
-      --muted: #a8bad8;
-      --accent: #70e1ff;
-      --good: #72ffc2;
-      --warn: #ffd97a;
-      --bad: #ff8ea3;
-      --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      --shadow: 0 18px 40px rgba(2, 8, 26, 0.46);
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-    }
-
+    html,
     body {
-      min-height: 100vh;
-      font-family: var(--font);
-      color: var(--text);
-      background:
-        radial-gradient(75% 75% at 20% 15%, rgba(112, 225, 255, 0.16), transparent 52%),
-        radial-gradient(75% 75% at 80% 85%, rgba(123, 95, 255, 0.16), transparent 48%),
-        linear-gradient(165deg, var(--bg1), var(--bg2));
-      display: flex;
-      justify-content: center;
-      align-items: stretch;
-      padding: 18px;
-    }
-
-    .frame {
-      width: min(1120px, 100%);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 16px;
-      background: var(--bg-panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(6px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .frame::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.05) 45%, transparent 46%);
-      pointer-events: none;
-      opacity: .25;
-      mix-blend-mode: screen;
-    }
-
-    header {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px dashed var(--line);
-      margin-bottom: 12px;
-    }
-
-    h1 {
       margin: 0;
-      font-size: clamp(1.7rem, 3.2vw, 2.4rem);
-      letter-spacing: 0.01em;
-    }
-
-    .sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .grid {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 1fr minmax(260px, 320px);
-      gap: 14px;
-      align-items: start;
-    }
-
-    .game-wrap {
-      background: rgba(6, 10, 24, 0.9);
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      padding: 12px;
-      min-height: 520px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .hud {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      font-size: 13px;
-    }
-
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 11px;
-      padding: 8px 10px;
-      background: rgba(13, 20, 47, 0.6);
-      min-height: 48px;
-    }
-
-    .good { color: var(--good); }
-    .warn { color: var(--warn); }
-    .bad { color: var(--bad); }
-
-    .hud-label {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 4px;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
     }
 
     canvas {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border: 1px solid var(--line);
-      background: #0a1024;
-      border-radius: 12px;
       display: block;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text);
-      font-family: inherit;
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: transform .15s ease;
-    }
-
-    button:hover,
-    button:focus-visible { transform: translateY(-1px); }
-
-    .primary {
-      border-color: rgba(112, 225, 255, 0.55);
-      background: linear-gradient(180deg, rgba(112, 225, 255, 0.3), rgba(112, 225, 255, 0.08));
-      color: #04233d;
-      font-weight: 700;
-    }
-
-    .aside {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      gap: 12px;
-    }
-
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      background: rgba(12, 19, 43, 0.72);
-    }
-
-    .panel h2 {
-      margin: 0 0 8px;
-      font-size: 16px;
-    }
-
-    .panel p {
-      margin: 6px 0;
-      line-height: 1.6;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .inventory {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .slot {
-      border: 1px dashed var(--line);
-      border-radius: 10px;
-      padding: 8px;
-      background: rgba(8, 13, 28, 0.7);
-      min-height: 56px;
-    }
-
-    .slot strong {
-      color: #dcecff;
-      display: block;
-      margin-bottom: 4px;
-      font-size: 13px;
-    }
-
-    .slot .value {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .log {
-      max-height: 150px;
-      overflow: auto;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px;
-      background: rgba(7, 12, 28, 0.65);
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .log-line + .log-line { margin-top: 6px; }
-
-    .badge {
-      display: inline-flex;
-      padding: 2px 8px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      font-size: 11px;
-      margin-right: 6px;
-      color: #b7d0f0;
-    }
-
-    .link-area {
-      display: grid;
-      gap: 8px;
-    }
-
-    .link-area a {
-      color: #c5f0ff;
-      text-decoration: none;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.03);
-      font-size: 13px;
-    }
-
-    .touch { display: none; gap: 10px; margin-top: 8px; }
-    .touch-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .touch button {
-      padding: 16px;
-      font-weight: 700;
-      border-radius: 12px;
-    }
-
-    @media (max-width: 960px) {
-      .grid { grid-template-columns: 1fr; }
-      .touch { display: grid; }
-      .hud { grid-template-columns: 1fr; }
-      .aside { grid-template-columns: repeat(2, minmax(0, 1fr)); display: grid; }
-    }
-
-    @media (max-width: 660px) {
-      body { padding: 10px; }
-      .frame { padding: 12px; }
-      .aside { grid-template-columns: 1fr; }
-      .touch-grid { grid-template-columns: repeat(3, 1fr); }
-      .touch button { padding: 14px 8px; }
     }
   </style>
-</head>
-<body>
-  <section class="frame">
-    <header>
-      <div>
-        <h1>PixelWorld 單機互動 Demo</h1>
-        <div class="sub">這是「本地可運行」版本：不依賴 API / WebSocket，直接在 GitHub Pages 展示前端能力。</div>
-      </div>
-      <div class="sub">操作：WASD 或方向鍵／手機可用螢幕按鈕</div>
-    </header>
-
-    <div class="grid">
-      <main>
-        <section class="game-wrap">
-          <div class="hud">
-            <div class="card">
-              <div class="hud-label">玩家</div>
-              <div>HP: <span id="hp">100</span> / 100 | 夜晚值: <span id="time">00:00</span></div>
-            </div>
-            <div class="card">
-              <div class="hud-label">目標</div>
-              <div id="goal" class="warn">採集全部木材後，建造兩個木箱離開。</div>
-            </div>
-            <div class="card">
-              <div class="hud-label">動作提示</div>
-              <div id="tip">按 <span class="badge">空白鍵</span> / <span class="badge">互動</span> 拾取、建造</div>
-            </div>
-          </div>
-
-          <canvas id="world" width="960" height="540" aria-label="PixelWorld Demo"></canvas>
-
-          <div class="controls">
-            <button id="btnRestart" class="primary">重新開始</button>
-            <button id="btnAuto">切換自動演示</button>
-            <button id="btnNight">日夜切換</button>
-            <button id="btnMine">建造木箱 (x1 木材)</button>
-          </div>
-
-          <div class="touch">
-            <div class="touch-grid">
-              <span></span>
-              <button data-dir="up">⬆</button>
-              <span></span>
-              <button data-dir="left">⬅</button>
-              <button data-act="action">拾取/放置</button>
-              <button data-dir="right">➡</button>
-              <span></span>
-              <button data-dir="down">⬇</button>
-              <span></span>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <aside class="aside">
-        <section class="panel">
-          <h2>資源 / 背包</h2>
-          <div class="inventory" id="inventory"></div>
-        </section>
-
-        <section class="panel">
-          <h2>互動事件</h2>
-          <div class="log" id="log"></div>
-        </section>
-
-        <section class="panel">
-          <h2>說明</h2>
-          <p>你會在 2D 像素世界裡探索，踩在草地上可順利行走；撞到岩石不能通過。走到資源旁邊按空白鍵可以採集，拿到木頭後可建造木箱（需要2木頭）。</p>
-          <p>這個展示版可直接在 <code>GitHub Pages</code> 運行，顯示你「可控制、可玩、可回饋」的前端實作能力。</p>
-        </section>
-
-        <section class="panel">
-          <h2>連結</h2>
-          <div class="link-area">
-            <a href="lobby-online.html">進入多人原版（需後端）</a>
-            <a href="game.html?room=public-survival&language=tw">原始 game.html（展示載入）」</a>
-            <a href="./">回到作品資料夾</a>
-          </div>
-        </section>
-      </aside>
-    </div>
-  </section>
-
   <script>
     (() => {
-      const canvas = document.getElementById('world');
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width;
-      const h = canvas.height;
+      const DEFAULT_ROOM = 'public-survival';
+      const DEFAULT_NAME = '豬大探索者';
+      const DEFAULT_MAP = 'piggy-base';
 
-      const GRID = 28;
-      const COLS = Math.floor(w / GRID);
-      const ROWS = Math.floor(h / GRID);
-      const TILE = {
-        grass: '#3f8a4c',
-        dirt: '#7a5a36',
-        stone: '#6a6d72',
-        tree: '#2f5d36',
-        water: '#3b77d4',
-        chest: '#f0be5d',
-        crate: '#8f7359',
+      const searchParams = new URLSearchParams(window.location.search);
+      if (!searchParams.get('room')) {
+        searchParams.set('room', DEFAULT_ROOM);
+      }
+      if (!searchParams.get('name')) {
+        searchParams.set('name', DEFAULT_NAME);
+      }
+      if (!searchParams.get('map')) {
+        searchParams.set('map', DEFAULT_MAP);
+      }
+      if (!searchParams.get('language')) {
+        searchParams.set('language', 'tw');
+      }
+      const resolved = {
+        roomId: searchParams.get('room')?.trim() || DEFAULT_ROOM,
+        name: searchParams.get('name')?.trim() || DEFAULT_NAME,
+        mapId: searchParams.get('map')?.trim() || DEFAULT_MAP,
+      };
+      const urlSuffix = searchParams.toString();
+      const nextLocation = `${window.location.pathname}?${urlSuffix}`;
+      if (window.location.href !== new URL(nextLocation, window.location.href).toString()) {
+        window.history.replaceState({}, '', nextLocation);
+      }
+
+      const roomJoinResponse = {
+        ok: true,
+        room: {
+          phase: 'open',
+          availableSlots: 64,
+          mapId: resolved.mapId,
+        },
       };
 
-      const player = {
-        x: 9,
-        x2: 9,
-        y: 9,
-        speed: 0.12,
-        vx: 0,
-        vy: 0,
-        hp: 100,
-      };
+      const originalXMLHttpRequest = window.XMLHttpRequest;
+      class MockXMLHttpRequest {
+        constructor() {
+          this.readyState = 0;
+          this.status = 0;
+          this.responseText = '';
+          this.onload = null;
+          this.onerror = null;
+          this.onreadystatechange = null;
+          this._async = true;
+          this._method = 'GET';
+          this._url = '';
+          this._headers = {};
+        }
 
-      let map = [];
-      let crates = [];
-      let frame = 0;
-      let nightMode = false;
-      let autoPlay = false;
-      const inventory = {
-        木材: 0,
-        藥水: 1,
-        石塊: 0,
-      };
-      const goal = { woodNeed: 2, crafted: 0 };
-      let logLines = [];
-      const msg = (text, type = 'info') => {
-        logLines.unshift({ text, type, t: Date.now() });
-        if (logLines.length > 50) logLines.length = 50;
-        renderLog();
-      };
+        open(method, url, async = true) {
+          this._method = (method || '').toUpperCase();
+          this._url = String(url);
+          this._async = async !== false;
+          this.readyState = 1;
+        }
 
-      const tileKinds = ['grass', 'grass', 'grass', 'dirt', 'water'];
-      const trees = new Set();
-      const stones = new Set();
+        setRequestHeader(key, value) {
+          this._headers[key] = String(value);
+        }
 
-      const toKey = (x, y) => `${x},${y}`;
-      const neighbors = [
-        [0, -1], [1, 0], [-1, 0], [0, 1]
-      ];
+        send(body) {
+          const payload = JSON.stringify(roomJoinResponse);
+          const normalizedUrl = (() => {
+            try {
+              if (this._url.startsWith('/')) {
+                return this._url;
+              }
+              return new URL(this._url, window.location.href).pathname;
+            } catch {
+              return this._url;
+            }
+          })();
+          const sendNow = () => {
+            this.readyState = 4;
+            const isRoomRequest = this._method === 'GET'
+              && normalizedUrl.startsWith('/api/rooms/')
+              && normalizedUrl.split('/').length >= 4;
 
-      function resetWorld() {
-        map = [];
-        trees.clear();
-        stones.clear();
-        crates = [];
-        player.x = Math.floor(COLS / 3);
-        player.y = Math.floor(ROWS / 2);
-        player.vx = 0;
-        player.vy = 0;
-        player.hp = 100;
-        frame = 0;
-        goal.woodNeed = 2;
-        goal.crafted = 0;
-        inventory.木材 = 0;
-        inventory.石塊 = 0;
-        inventory.藥水 = 1;
-        for (let y = 0; y < ROWS; y++) {
-          map[y] = [];
-          for (let x = 0; x < COLS; x++) {
-            let v;
-            if (x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1) {
-              v = 'stone';
+            if (isRoomRequest) {
+              this.status = 200;
+              this.responseText = payload;
             } else {
-              const noise = Math.sin(x * 0.65) + Math.cos(y * 0.73) + (Math.random() * 0.6 - 0.3);
-              if (y > ROWS * 0.75) v = 'water';
-              else if (noise > 1.0) v = 'dirt';
-              else v = tileKinds[(Math.random() * tileKinds.length) | 0];
+              this.status = 404;
+              this.responseText = JSON.stringify({ ok: false, message: 'mock endpoint' });
             }
-            map[y][x] = v;
-            if (v === 'grass' && Math.random() < 0.03) {
-              trees.add(toKey(x, y));
+
+            if (typeof this.onreadystatechange === 'function') {
+              this.onreadystatechange();
             }
-            if (v === 'dirt' && Math.random() < 0.012) {
-              stones.add(toKey(x, y));
+            if (this.status >= 200 && this.status < 300 && typeof this.onload === 'function') {
+              this.onload({ target: this });
             }
+          };
+
+          if (this._async) {
+            setTimeout(sendNow, 0);
+          } else {
+            sendNow();
+          }
+
+          return body;
+        }
+      }
+
+      const decodeServerPayload = (raw) => {
+        if (typeof raw === 'string') {
+          try {
+            return JSON.parse(raw);
+          } catch {
+            return null;
           }
         }
+        try {
+          return {
+            v: 1,
+            payload: raw instanceof Blob
+              ? JSON.parse(raw)
+              : {
+                  type: 'unknown',
+                },
+          };
+        } catch {
+          return null;
+        }
+      };
 
-        // 置放寶箱與石塊作為目標互動物件
-        crates = [
-          { x: Math.min(COLS - 3, Math.max(3, Math.floor(Math.random() * COLS))),
-            y: Math.min(ROWS - 3, Math.max(3, Math.floor(Math.random() * ROWS)) ),
-            type: '木箱',
-            collected: false,
-            color: TILE.chest,
+      const wrapPayload = (message) => ({
+        v: 1,
+        payload: message,
+      });
+
+      const nowMs = () => Date.now();
+      const clamp = (value, fallback = 0) => (Number.isFinite(value) ? value : fallback);
+      const basePlayer = {
+        position: { x: 0.5, y: 7.02, z: 0.5 },
+        velocity: { x: 0, y: 0, z: 0 },
+      };
+
+      const toWelcomeMessage = () => {
+        const now = nowMs();
+        const playerId = `p-${Math.abs(resolved.name.split('').reduce((sum, char) => sum + char.charCodeAt(0) * 31, 0)).toString(16)}`;
+        const nowPlayer = {
+          id: playerId,
+          name: resolved.name,
+          position: { ...basePlayer.position },
+          velocity: { ...basePlayer.velocity },
+          yaw: 0,
+          pitch: 0,
+          moveSpeed: 1,
+          attackPulse: 0,
+          health: 20,
+          maxHealth: 20,
+          cameraMode: 'first-person',
+          selectedSlot: 0,
+          deathCount: 0,
+          avatarStyleId: 'zhuda',
+          equipmentVisuals: {
+            weaponEquipmentId: null,
+            toolEquipmentId: null,
+            headEquipmentId: null,
+            bodyEquipmentId: null,
+            accessoryEquipmentId: null,
           },
-        ];
+          isDowned: false,
+          downedUntilMs: null,
+          isSleeping: false,
+          sleepingBedCell: null,
+        };
 
-        msg('世界重新生成完成，拾取木材再建造木箱吧。', 'good');
-        updateGoal();
-        renderInventory();
-      }
-
-      const keyState = new Set();
-
-      function keyNameToDir(name) {
-        if (['ArrowUp', 'w', 'W'].includes(name)) return [0, -1];
-        if (['ArrowDown', 's', 'S'].includes(name)) return [0, 1];
-        if (['ArrowLeft', 'a', 'A'].includes(name)) return [-1, 0];
-        if (['ArrowRight', 'd', 'D'].includes(name)) return [1, 0];
-        return [0, 0];
-      }
-
-      function canWalk(x, y) {
-        if (x <= 0 || y <= 0 || x >= COLS - 1 || y >= ROWS - 1) return false;
-        const t = map[y][x];
-        if (t === 'water' || t === 'stone') return false;
-        return true;
-      }
-
-      function keyMove(delta) {
-        let dx = 0;
-        let dy = 0;
-        if (keyState.has('ArrowUp') || keyState.has('w') || keyState.has('W')) dy -= 1;
-        if (keyState.has('ArrowDown') || keyState.has('s') || keyState.has('S')) dy += 1;
-        if (keyState.has('ArrowLeft') || keyState.has('a') || keyState.has('A')) dx -= 1;
-        if (keyState.has('ArrowRight') || keyState.has('d') || keyState.has('D')) dx += 1;
-        if (dx === 0 && dy === 0) return;
-
-        const nx = player.x + Math.sign(dx);
-        const ny = player.y + Math.sign(dy);
-        if (canWalk(nx, ny)) {
-          player.x = nx;
-          player.y = ny;
-          player.x2 = nx;
-          player.y2 = ny;
-        } else {
-          player.vx = Math.max(0, player.vx - 1);
-          msg('該位置不可通行（岩石或水域）', 'warn');
-        }
-      }
-
-      function adjacentHasTreeOrStone() {
-        for (const [ox, oy] of neighbors) {
-          const nx = player.x + ox;
-          const ny = player.y + oy;
-          const key = toKey(nx, ny);
-          if (trees.has(key) && map[ny]?.[nx]) return { kind: 'tree', key, x: nx, y: ny };
-          if (stones.has(key) && map[ny]?.[nx]) return { kind: 'stone', key, x: nx, y: ny };
-        }
-        return null;
-      }
-
-      function tryInteract() {
-        const chest = crates.find(c => Math.abs(c.x - player.x) + Math.abs(c.y - player.y) === 1 && !c.collected);
-        if (chest) {
-          if (inventory.木材 >= 2) {
-            chest.collected = true;
-            inventory.木材 -= 2;
-            goal.crafted += 1;
-            msg('你建造了一個木箱，世界有了可回收目標。', 'good');
-            updateGoal();
-            renderInventory();
-            return;
-          }
-          msg('木箱還差木材（需2木材）', 'warn');
-          return;
-        }
-
-        const target = adjacentHasTreeOrStone();
-        if (target) {
-          if (target.kind === 'tree') {
-            trees.delete(target.key);
-            map[target.y][target.x] = 'dirt';
-            inventory.木材 += 1;
-            msg('你砍倒一棵樹，獲得1 木材。', 'good');
-            renderInventory();
-            updateGoal();
-            return;
-          }
-          if (target.kind === 'stone') {
-            stones.delete(target.key);
-            map[target.y][target.x] = 'dirt';
-            inventory.石塊 += 1;
-            msg('你採到1 個石塊。', 'good');
-            renderInventory();
-            return;
-          }
-        }
-
-        msg('站在資源旁邊可採集，或站到木箱旁可建造。', 'info');
-      }
-
-      function updateGoal() {
-        const targetEl = document.getElementById('goal');
-        const ok = goal.crafted >= 1;
-        if (ok) {
-          targetEl.textContent = '目標達成：你已建造木箱，返回木頭樹林區可繼續探索。';
-          targetEl.className = 'good';
-        } else {
-          targetEl.textContent = `收集木材 ${inventory.木材}/${goal.woodNeed} 後建造1個木箱`;
-          targetEl.className = 'warn';
-        }
-      }
-
-      function renderInventory() {
-        const panel = document.getElementById('inventory');
-        panel.innerHTML = '';
-        Object.entries(inventory).forEach(([name, count]) => {
-          const el = document.createElement('div');
-          el.className = 'slot';
-          el.innerHTML = `<strong>${name}</strong><span class="value">${count}</span>`;
-          panel.appendChild(el);
+        return wrapPayload({
+          type: 'welcome',
+          playerId,
+          players: [nowPlayer],
+          blockStates: [],
+          paintings: [],
+          screens: [],
+          propertyClaims: [],
+          worldSnapshotChunkCount: 0,
+          inventory: {
+            dirt: 120,
+            grass: 80,
+            stone: 80,
+            wood: 20,
+            plank: 30,
+            torch: 20,
+            water_bucket: 1,
+          },
+          equipment: {
+            pickaxeTier: 2,
+            spearTier: 1,
+            bagCapacity: 32,
+            bag: [],
+            equipped: {
+              weaponEquipmentId: null,
+              toolEquipmentId: null,
+              headEquipmentId: null,
+              bodyEquipmentId: null,
+              accessoryEquipmentId: null,
+            },
+          },
+          monsters: [
+            {
+              id: 'monster-orange-1',
+              kind: 'orange-mushroom',
+              position: { x: -16, y: 6, z: 4 },
+              health: 24,
+              maxHealth: 24,
+              targetPlayerId: null,
+              isTamed: false,
+            },
+          ],
+          npcs: [
+            {
+              id: 'npc-guide',
+              name: '村長',
+              kind: 'guide',
+              position: { x: 6.5, y: 7, z: 6.5 },
+              color: '#8ec6ff',
+              avatarStyleId: 'zhuer',
+            },
+          ],
+          onlineCount: 1,
+          roundState: {
+            goalSeconds: 0,
+            serverNowMs: now,
+            roundStartedAtMs: now,
+            hazardStartsAtMs: now,
+            goalEndsAtMs: now + clamp(20 * 60 * 1000),
+          },
+          dayNightState: {
+            cycleDurationMs: 240000,
+            cycleStartedAtMs: now,
+            serverNowMs: now,
+          },
+          teamState: {
+            onlineCount: 1,
+            roundPlayers: 1,
+            alivePlayers: 1,
+            flawless: true,
+          },
+          roomState: {
+            id: resolved.roomId,
+            title: '本地單機房',
+            mapId: resolved.mapId,
+            gameMode: 'survival',
+            theme: 'zhuda-zhuer',
+            maxPlayers: 16,
+            allowPlayerDamage: false,
+            onlineCount: 1,
+            isPermanent: true,
+            phase: 'open',
+            activeUntilMs: null,
+            closingAtMs: null,
+            serverNowMs: now,
+            joinPath: `/room.html?room=${encodeURIComponent(resolved.roomId)}`,
+          },
+          chatHistory: [
+            {
+              id: `welcome-${now}`,
+              playerId: 'system',
+              playerName: '系統',
+              text: '歡迎進入單機版，這是從後端快照模擬進來的遊戲。',
+              sentAtMs: now,
+            },
+          ],
+          voiceParticipantIds: [],
+          transportCapabilities: {
+            protocolVersion: 1,
+            sessionTransport: 'websocket-msgpack',
+            gameplay: {
+              reliableLane: 'websocket',
+              lowLatencyLane: 'none',
+              binaryEncoding: 'msgpack',
+            },
+            features: {
+              realtimeChat: true,
+              voiceSignaling: false,
+              voiceMedia: false,
+              gameplayDataChannel: false,
+            },
+          },
+          piggyCoinBalanceCents: 2000,
+          totalPlayTimeMs: 0,
         });
-      }
+      };
 
-      function renderLog() {
-        const box = document.getElementById('log');
-        box.innerHTML = logLines.map((line) => {
-          const cls = line.type === 'good' ? 'good' : line.type === 'warn' ? 'warn' : 'muted';
-          const sec = ((Date.now() - line.t) / 1000).toFixed(0);
-          return `<div class="log-line"><span class="${cls}">[${sec}s]</span> ${line.text}</div>`;
-        }).join('');
-      }
+      const toPlayerHeartbeat = (messageType, index) => {
+        const now = nowMs();
+        const nowPlayer = {
+          id: `p-${Math.abs(resolved.name.split('').reduce((sum, char) => sum + char.charCodeAt(0) * 31, 0)).toString(16)}`,
+          name: resolved.name,
+          position: {
+            x: clamp(basePlayer.position.x + 0.03 * index, 0.5),
+            y: clamp(basePlayer.position.y, 7.02),
+            z: clamp(basePlayer.position.z + 0.03 * index, 0.5),
+          },
+          velocity: { ...basePlayer.velocity },
+          yaw: 0,
+          pitch: 0,
+          moveSpeed: 1,
+          attackPulse: 0,
+          health: 20,
+          maxHealth: 20,
+          cameraMode: 'first-person',
+          selectedSlot: 0,
+          deathCount: 0,
+          avatarStyleId: 'zhuda',
+          equipmentVisuals: {
+            weaponEquipmentId: null,
+            toolEquipmentId: null,
+            headEquipmentId: null,
+            bodyEquipmentId: null,
+            accessoryEquipmentId: null,
+          },
+          isDowned: false,
+          downedUntilMs: null,
+          isSleeping: false,
+          sleepingBedCell: null,
+        };
 
-      function drawTile(x, y, color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x * GRID, y * GRID, GRID, GRID);
-      }
+        return {
+          type: messageType,
+          player: nowPlayer,
+        };
+      };
 
-      function drawWorld() {
-        const pulse = (Math.sin(frame * 0.08) + 1) * 0.5;
-        for (let y = 0; y < ROWS; y++) {
-          for (let x = 0; x < COLS; x++) {
-            drawTile(x, y, TILE[map[y][x]] || TILE.grass);
+      class MockWebSocket {
+        static CONNECTING = 0;
+        static OPEN = 1;
+        static CLOSING = 2;
+        static CLOSED = 3;
+
+        constructor(url) {
+          this.url = url;
+          this.readyState = MockWebSocket.CONNECTING;
+          this.binaryType = 'arraybuffer';
+          this.protocol = '';
+          this.extensions = '';
+          this.bufferedAmount = 0;
+          this.onopen = null;
+          this.onmessage = null;
+          this.onerror = null;
+          this.onclose = null;
+          this._listeners = new Map();
+          this._closed = false;
+          this._closeReason = '';
+          this._closeCode = 1000;
+          this._heartbeatCounter = 0;
+
+          queueMicrotask(() => {
+            this.readyState = MockWebSocket.OPEN;
+            this._fire('open', {});
+            const welcome = toWelcomeMessage();
+            this._fire('message', { data: JSON.stringify(welcome) });
+
+            this._tick = window.setInterval(() => {
+              if (this.readyState !== MockWebSocket.OPEN) {
+                return;
+              }
+              this._heartbeatCounter += 1;
+              if (this._heartbeatCounter === 4) {
+                this._heartbeatCounter = 0;
+                const payload = wrapPayload({
+                  type: 'player_sync',
+                  player: toPlayerHeartbeat('player_sync', this._heartbeatCounter).player,
+                });
+                this._fire('message', { data: JSON.stringify(payload) });
+              }
+            }, 1000);
+          });
+        }
+
+        addEventListener(type, handler) {
+          if (!this._listeners.has(type)) {
+            this._listeners.set(type, new Set());
           }
+          this._listeners.get(type).add(handler);
         }
 
-        ctx.save();
-        for (const key of trees) {
-          const [x, y] = key.split(',').map(Number);
-          ctx.fillStyle = 'rgba(30, 95, 45, 0.95)';
-          ctx.fillRect(x * GRID + 4, y * GRID + 4, GRID - 8, GRID - 8);
-          ctx.fillStyle = '#6cf6a1';
-          ctx.beginPath();
-          ctx.ellipse(x * GRID + GRID / 2, y * GRID + GRID / 2 - 4, 7, 4, 0, 0, Math.PI * 2);
-          ctx.fill();
+        removeEventListener(type, handler) {
+          this._listeners.get(type)?.delete(handler);
         }
 
-        for (const key of stones) {
-          const [x, y] = key.split(',').map(Number);
-          ctx.fillStyle = '#b8bcc3';
-          ctx.fillRect(x * GRID + 5, y * GRID + 14, GRID - 10, GRID - 14);
-          ctx.fillStyle = '#6f7480';
-          ctx.fillRect(x * GRID + 8, y * GRID + 18, GRID - 16, 4);
-        }
+        _fire(type, init = {}) {
+          const event = { type, target: this, currentTarget: this, ...init };
+          if (type === 'message' && this.readyState >= MockWebSocket.OPEN) {
+            event.origin = this.url;
+            event.data = init.data ?? event.data;
+          }
+          if (type === 'close') {
+            event.code = this._closeCode;
+            event.reason = this._closeReason;
+            event.wasClean = true;
+          }
 
-        for (const c of crates) {
-          if (c.collected) continue;
-          ctx.fillStyle = c.color;
-          ctx.fillRect(c.x * GRID + 6, c.y * GRID + 6, GRID - 12, GRID - 12);
-          ctx.fillStyle = '#3a2810';
-          ctx.fillText('木箱', c.x * GRID + 6, c.y * GRID + 18);
-        }
+          const handler = this[`on${type}`];
+          if (typeof handler === 'function') {
+            handler(event);
+          }
+          const handlers = this._listeners.get(type);
+          if (!handlers) {
+            return;
+          }
 
-        // player
-        const px = player.x * GRID;
-        const py = player.y * GRID;
-        const glow = 4 + pulse * 4;
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.35 + pulse * 0.15})`;
-        ctx.arc(px + GRID / 2, py + GRID / 2 + 1, GRID / 2 + glow * 0.4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#ffd16a';
-        ctx.fillRect(px + 7, py + 2, GRID - 14, 9);
-        ctx.fillStyle = '#1f3e77';
-        ctx.fillRect(px + 9, py + 12, GRID - 18, 14);
-        ctx.fillStyle = '#0b1938';
-        ctx.fillRect(px + 12, py + 24, GRID - 24, 7);
-
-        // tiny goal area marker
-        const gx = Math.floor(COLS * 0.75);
-        const gy = Math.floor(ROWS * 0.18);
-        const markerPulse = 1 + Math.sin(frame * 0.15) * 0.1;
-        ctx.fillStyle = '#f4ff94';
-        ctx.globalAlpha = 0.75;
-        ctx.fillRect(gx * GRID + 6, gy * GRID + 6, GRID - 12, GRID - 12);
-        ctx.globalAlpha = 1;
-
-        if (nightMode) {
-          const shade = 'rgba(8, 11, 24, 0.55)';
-          ctx.fillStyle = shade;
-          ctx.fillRect(0, 0, w, h);
-        }
-
-        // UI on canvas
-        ctx.fillStyle = '#dff3ff';
-        ctx.font = 'bold 18px monospace';
-        ctx.fillText(`Time ${Math.floor((frame / 60) % 24).toString().padStart(2, '0')}:00`, 14, 24);
-      }
-
-      function tick() {
-        frame += 1;
-        const p = Math.sin(frame * 0.01);
-        if (autoPlay) {
-          if (frame % 12 === 0) {
-            const dirs = [
-              ['ArrowRight', 'ArrowRight', 'ArrowRight'],
-              ['ArrowDown', 'ArrowDown'],
-              ['ArrowRight', 'ArrowRight'],
-            ];
-            const choice = dirs[frame % dirs.length];
-            if (choice && choice.length) {
-              const c = choice[frame % choice.length];
-              keyState.add(c);
-              keyMove();
-              keyState.delete(c);
+          handlers.forEach((callback) => {
+            if (typeof callback === 'function') {
+              callback(event);
             }
-          }
-        } else {
-          keyMove();
+          });
         }
 
-        if (Math.random() < 0.003) {
-          const r = Math.random();
-          if (r < 0.4 && inventory.藥水 > 0) {
-            msg('你感應到遠處有聲音，先回到中心找答案。', 'info');
-          }
+        send(data) {
+          // 本地端上報訊息目前不影響畫面，保留以避免前端邏輯拋錯。
+          void decodeServerPayload(data);
+          return data;
         }
 
-        // health recovery / penalty only for demo feel
-        if (Math.floor(frame % 360) === 0) {
-          player.hp = Math.min(100, player.hp + 1);
-          document.getElementById('hp').textContent = player.hp;
-        }
-
-        document.getElementById('time').textContent = `${String(Math.floor((frame / 60) % 24)).padStart(2, '0')}:00`;
-        drawWorld();
-
-        requestAnimationFrame(tick);
-      }
-
-      function setupListeners() {
-        window.addEventListener('keydown', (e) => {
-          if (e.code === 'Space' || e.key === ' ') {
-            e.preventDefault();
-            tryInteract();
+        close(code = 1000, reason = '') {
+          if (this.readyState === MockWebSocket.CLOSING || this.readyState === MockWebSocket.CLOSED) {
             return;
           }
-          keyState.add(e.key);
-        });
-
-        window.addEventListener('keyup', (e) => {
-          keyState.delete(e.key);
-        });
-
-        const touchButtons = document.querySelectorAll('.touch button');
-        touchButtons.forEach((btn) => {
-          const dir = btn.dataset.dir;
-          const act = btn.dataset.act;
-          const start = (ev) => {
-            ev.preventDefault();
-            if (dir) {
-              if (dir === 'up') {
-                keyState.add('ArrowUp');
-              }
-              if (dir === 'down') {
-                keyState.add('ArrowDown');
-              }
-              if (dir === 'left') {
-                keyState.add('ArrowLeft');
-              }
-              if (dir === 'right') {
-                keyState.add('ArrowRight');
-              }
-            }
-            if (act) {
-              tryInteract();
-            }
-          };
-          const end = () => {
-            if (!dir) return;
-            if (dir === 'up') keyState.delete('ArrowUp');
-            if (dir === 'down') keyState.delete('ArrowDown');
-            if (dir === 'left') keyState.delete('ArrowLeft');
-            if (dir === 'right') keyState.delete('ArrowRight');
-          };
-
-          btn.addEventListener('touchstart', start, { passive: false });
-          btn.addEventListener('touchend', end, { passive: false });
-          btn.addEventListener('mousedown', start);
-          btn.addEventListener('mouseup', end);
-          btn.addEventListener('mouseleave', end);
-        });
-
-        document.getElementById('btnRestart').addEventListener('click', () => {
-          resetWorld();
-          msg('重新開始一次。', 'good');
-        });
-
-        document.getElementById('btnNight').addEventListener('click', () => {
-          nightMode = !nightMode;
-          msg(`已切換為${nightMode ? '夜間' : '白天'}模式`, nightMode ? 'warn' : 'good');
-        });
-
-        document.getElementById('btnAuto').addEventListener('click', () => {
-          autoPlay = !autoPlay;
-          msg(autoPlay ? '開啟自動演示模式' : '關閉自動演示模式', autoPlay ? 'good' : 'info');
-        });
-
-        document.getElementById('btnMine').addEventListener('click', () => {
-          if (inventory.木材 > 0) {
-            inventory.木材 -= 1;
-            crates.push({ x: player.x + 1, y: player.y, type: '木箱', collected: false, color: TILE.crate });
-            msg('你消耗1木材放下一個臨時木箱。', 'good');
-            renderInventory();
-            return;
+          this.readyState = MockWebSocket.CLOSING;
+          this._closeCode = code;
+          this._closeReason = reason;
+          if (this._tick) {
+            clearInterval(this._tick);
           }
-          msg('沒有木材，先找樹採集。', 'bad');
-        });
+          this.readyState = MockWebSocket.CLOSED;
+          this._fire('close', {});
+        }
       }
 
-      resetWorld();
-      renderInventory();
-      renderLog();
-      setupListeners();
-      requestAnimationFrame(tick);
+      window.XMLHttpRequest = MockXMLHttpRequest;
+      window.WebSocket = MockWebSocket;
     })();
   </script>
+  <script type="module" crossorigin src="./assets/game-DEqRvBI0.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/vendor-three-v1hl5ewM.js">
+  <link rel="modulepreload" crossorigin href="./assets/game-i18n-CJMGkwkY.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-msgpack-Ik84_W5E.js">
+  <link rel="modulepreload" crossorigin href="./assets/game-content-C6UsAPY8.js">
+  <link rel="modulepreload" crossorigin href="./assets/game-runtime-lUDErr5s.js">
+  <link rel="modulepreload" crossorigin href="./assets/game-render-BicsSSqa.js">
+  <link rel="modulepreload" crossorigin href="./assets/game-ui-r5ko-51h.js">
+  <link rel="modulepreload" crossorigin href="./assets/game-network-DfuAp0G1.js">
+  <link rel="stylesheet" crossorigin href="./assets/game-runtime-Cnb5Mvxb.css">
+  <link rel="stylesheet" crossorigin href="./assets/game-render-mQxndei1.css">
+  <link rel="stylesheet" crossorigin href="./assets/game-ui-DNQcluBA.css">
+  <link rel="stylesheet" crossorigin href="./assets/game-Bk5FG_z4.css">
+</head>
+<body>
+  <div id="app"></div>
 </body>
 </html>
