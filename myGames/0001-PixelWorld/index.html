@@ -14,6 +14,11 @@
   <link rel="icon" type="image/png" sizes="256x256" href="./images/zhuda-zhuer-favicon-256.png">
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180.png">
   <title>豬大與豬二世界（單機版）</title>
+  <script type="module">
+    import { d as decodeMsgpack, e as encodeMsgpack } from './assets/vendor-msgpack-Ik84_W5E.js';
+    window.__PW_DECODE_MSGPACK__ = decodeMsgpack;
+    window.__PW_ENCODE_MSGPACK__ = encodeMsgpack;
+  </script>
   <style>
     html,
     body {
@@ -35,6 +40,18 @@
       const DEFAULT_NAME = '豬大探索者';
       const DEFAULT_MAP = 'piggy-base';
 
+      const toSafeText = (value, fallback) => {
+        const trimmed = (value || '').toString().trim();
+        return trimmed.length > 0 ? trimmed : fallback;
+      };
+
+      const makeId = (base) =>
+        `p-${Math.abs(
+          base
+            .split('')
+            .reduce((sum, char) => sum + char.charCodeAt(0) * 31, 0),
+        ).toString(16)}`;
+
       const searchParams = new URLSearchParams(window.location.search);
       if (!searchParams.get('room')) {
         searchParams.set('room', DEFAULT_ROOM);
@@ -48,11 +65,14 @@
       if (!searchParams.get('language')) {
         searchParams.set('language', 'tw');
       }
+
       const resolved = {
-        roomId: searchParams.get('room')?.trim() || DEFAULT_ROOM,
-        name: searchParams.get('name')?.trim() || DEFAULT_NAME,
-        mapId: searchParams.get('map')?.trim() || DEFAULT_MAP,
+        roomId: toSafeText(searchParams.get('room'), DEFAULT_ROOM),
+        name: toSafeText(searchParams.get('name'), DEFAULT_NAME),
+        mapId: toSafeText(searchParams.get('map'), DEFAULT_MAP),
+        style: toSafeText(searchParams.get('style'), 'zhuda'),
       };
+
       const urlSuffix = searchParams.toString();
       const nextLocation = `${window.location.pathname}?${urlSuffix}`;
       if (window.location.href !== new URL(nextLocation, window.location.href).toString()) {
@@ -68,7 +88,582 @@
         },
       };
 
-      const originalXMLHttpRequest = window.XMLHttpRequest;
+      const wrapPayload = (message) => ({
+        v: 1,
+        payload: message,
+      });
+
+      const nowMs = () => Date.now();
+      const now = nowMs();
+      const nowSec = () => Math.floor(nowMs() / 1000);
+      const clamp = (value, min, max) => {
+        if (!Number.isFinite(value)) {
+          return 0;
+        }
+        return Math.min(Math.max(value, min), max);
+      };
+
+      const playerId = makeId(resolved.name);
+      const basePlayer = {
+        id: playerId,
+        name: resolved.name,
+        position: { x: 0.5, y: 7.02, z: 0.5 },
+        velocity: { x: 0, y: 0, z: 0 },
+        yaw: 0,
+        pitch: 0,
+        moveSpeed: 1,
+        attackPulse: 0,
+        health: 20,
+        maxHealth: 20,
+        cameraMode: 'first-person',
+        selectedSlot: 0,
+        deathCount: 0,
+        avatarStyleId: resolved.style || 'zhuda',
+        equipmentVisuals: {
+          weaponEquipmentId: null,
+          toolEquipmentId: null,
+          headEquipmentId: null,
+          bodyEquipmentId: null,
+          accessoryEquipmentId: null,
+        },
+        isDowned: false,
+        downedUntilMs: null,
+        isSleeping: false,
+        sleepingBedCell: null,
+      };
+
+      const roomState = {
+        id: resolved.roomId,
+        title: '本地單機房',
+        mapId: resolved.mapId,
+        gameMode: 'survival',
+        theme: 'zhuda-zhuer',
+        maxPlayers: 16,
+        allowPlayerDamage: false,
+        onlineCount: 1,
+        isPermanent: true,
+        phase: 'open',
+        activeUntilMs: null,
+        closingAtMs: null,
+        serverNowMs: now,
+        joinPath: `/room.html?room=${encodeURIComponent(resolved.roomId)}`,
+      };
+
+      const createPlayerState = () => ({
+        ...basePlayer,
+        health: basePlayer.health,
+        maxHealth: basePlayer.maxHealth,
+      });
+
+      const spawnFloorY = Math.max(5, Math.floor(basePlayer.position.y - 1));
+
+      const addBlock = (blocks, x, y, z, type) => {
+        blocks.push({
+          cell: { x, y, z },
+          type,
+        });
+      };
+
+      const buildClassicStarterMap = (mapId = 'piggy-base') => {
+        const floorY = spawnFloorY;
+        const radius = 18;
+        const blocks = [];
+
+        for (let x = -radius; x <= radius; x += 1) {
+          for (let z = -radius; z <= radius; z += 1) {
+            addBlock(
+              blocks,
+              x,
+              floorY,
+              z,
+              x === -radius || x === radius || z === -radius || z === radius ? 'stone' : 'grass',
+            );
+          }
+        }
+
+        for (let x = -5; x <= 3; x += 1) {
+          for (let z = -5; z <= 3; z += 1) {
+            addBlock(blocks, x, floorY + 1, z, 'dirt');
+          }
+        }
+
+        if (mapId === 'piggy-base' || mapId === 'classic') {
+          for (let z = -4; z <= 2; z += 1) {
+            addBlock(blocks, -8, floorY + 1, z, 'plank');
+          }
+          addBlock(blocks, -7, floorY + 1, -4, 'woodDoor');
+          addBlock(blocks, -7, floorY + 2, -4, 'woodDoor');
+          addBlock(blocks, -8, floorY + 1, 2, 'torch');
+          addBlock(blocks, -8, floorY + 1, -2, 'bed');
+          addBlock(blocks, -8, floorY + 1, -1, 'bed');
+          for (let x = -3; x <= 1; x += 1) {
+            addBlock(blocks, x, floorY + 1, -8, 'grass');
+            addBlock(blocks, x, floorY + 2, -8, 'plank');
+          }
+          addBlock(blocks, -1, floorY + 1, -8, 'torch');
+        } else if (mapId === 'builder-plateau') {
+          const plateauY = floorY + 6;
+          for (let x = -8; x <= 8; x += 1) {
+            for (let z = -8; z <= 8; z += 1) {
+              addBlock(blocks, x, plateauY, z, 'smoothStone');
+            }
+          }
+          addBlock(blocks, 0, plateauY + 1, 0, 'torch');
+        } else if (mapId === 'monster-frontier') {
+          const radius2 = 16;
+          for (let i = 0; i < 6; i += 1) {
+            const angle = (i / 6) * Math.PI * 2;
+            addBlock(
+              blocks,
+              Math.round(Math.cos(angle) * radius2),
+              floorY + 1,
+              Math.round(Math.sin(angle) * radius2),
+              'wood',
+            );
+          }
+        }
+
+        return blocks;
+      };
+
+      const buildSpawnFloorBlocks = () => {
+        const mapId = resolved.mapId || 'piggy-base';
+        return buildClassicStarterMap(mapId === 'piggy-base' || mapId === 'classic' ? 'classic' : mapId);
+      };
+
+      const state = {
+        players: new Map([[playerId, createPlayerState()]]),
+        spawnFloorBlocks: buildSpawnFloorBlocks(),
+        inventory: {
+          dirt: 120,
+          grass: 80,
+          stone: 80,
+          wood: 20,
+          plank: 30,
+          torch: 20,
+          water_bucket: 1,
+        },
+        equipment: {
+          pickaxeTier: 2,
+          spearTier: 1,
+          bagCapacity: 32,
+          bag: [],
+          equipped: {
+            weaponEquipmentId: null,
+            toolEquipmentId: null,
+            headEquipmentId: null,
+            bodyEquipmentId: null,
+            accessoryEquipmentId: null,
+          },
+        },
+        monsters: {
+          'monster-orange-1': {
+            id: 'monster-orange-1',
+            kind: 'orange-mushroom',
+            position: { x: -8, y: spawnFloorY + 0.02, z: 4 },
+            health: 24,
+            maxHealth: 24,
+            targetPlayerId: null,
+            isTamed: false,
+          },
+          'monster-orange-2': {
+            id: 'monster-orange-2',
+            kind: 'orange-mushroom',
+            position: { x: -10, y: spawnFloorY + 0.02, z: -6 },
+            health: 24,
+            maxHealth: 24,
+            targetPlayerId: null,
+            isTamed: false,
+          },
+        },
+        npcs: [
+          {
+            id: 'npc-guide',
+            name: '村長',
+            kind: 'guide',
+            position: { x: 6.5, y: 7, z: 6.5 },
+            color: '#8ec6ff',
+            avatarStyleId: 'zhuer',
+          },
+        ],
+        roomState,
+        lastSnapshotAtMs: nowMs(),
+        piggyCoinBalanceCents: 2000,
+        totalPlayTimeMs: 0,
+        onlineCount: 1,
+        sockets: new Set(),
+        chatSequence: 0,
+      };
+
+      const toWelcomeMessage = () => {
+        const now = nowMs();
+        return {
+          type: 'welcome',
+          playerId,
+          players: [state.players.get(playerId)],
+          blockStates: state.spawnFloorBlocks,
+          paintings: [],
+          screens: [],
+          propertyClaims: [],
+          worldSnapshotChunkCount: 0,
+          inventory: { ...state.inventory },
+          equipment: { ...state.equipment },
+          monsters: Object.values(state.monsters),
+          npcs: [...state.npcs],
+          onlineCount: state.onlineCount,
+          roundState: {
+            goalSeconds: 0,
+            serverNowMs: now,
+            roundStartedAtMs: now,
+            hazardStartsAtMs: now,
+            goalEndsAtMs: now + 20 * 60 * 1000,
+          },
+          dayNightState: {
+            cycleDurationMs: 240000,
+            cycleStartedAtMs: now,
+            serverNowMs: now,
+          },
+          teamState: {
+            onlineCount: state.onlineCount,
+            roundPlayers: state.onlineCount,
+            alivePlayers: state.onlineCount,
+            flawless: true,
+          },
+          roomState: { ...state.roomState },
+          chatHistory: [
+            {
+              id: `welcome-${nowSec()}`,
+              playerId: 'system',
+              playerName: '系統',
+              text: '歡迎進入單機版，這是從後端快照模擬進來的遊戲。',
+              sentAtMs: now,
+            },
+          ],
+          voiceParticipantIds: [],
+          transportCapabilities: {
+            protocolVersion: 1,
+            sessionTransport: 'websocket-msgpack',
+            gameplay: {
+              reliableLane: 'websocket',
+              lowLatencyLane: 'none',
+              binaryEncoding: 'msgpack',
+            },
+            features: {
+              realtimeChat: true,
+              voiceSignaling: false,
+              voiceMedia: false,
+              gameplayDataChannel: false,
+            },
+          },
+          piggyCoinBalanceCents: state.piggyCoinBalanceCents,
+          totalPlayTimeMs: 0,
+        };
+      };
+
+      const normalizeBlockMutation = (blockMutation) => {
+        if (!blockMutation || typeof blockMutation !== 'object') {
+          return null;
+        }
+        if (!blockMutation.cell || !Number.isFinite(blockMutation.cell.x) || !Number.isFinite(blockMutation.cell.y)
+          || !Number.isFinite(blockMutation.cell.z)) {
+          return null;
+        }
+
+        return {
+          cell: {
+            x: clamp(blockMutation.cell.x, -32768, 32767),
+            y: clamp(blockMutation.cell.y, -32768, 32767),
+            z: clamp(blockMutation.cell.z, -32768, 32767),
+          },
+          type: blockMutation.type ?? blockMutation.blockType ?? null,
+        };
+      };
+
+      const buildServerMessage = (type, payload = {}) => JSON.stringify(wrapPayload({ type, ...payload }));
+      const emitTo = (socket, type, payload = {}) => {
+        if (!socket || socket.readyState !== 1) {
+          return;
+        }
+        socket._fire('message', { data: buildServerMessage(type, payload) });
+      };
+      const broadcast = (type, payload = {}, options = {}) => {
+        state.sockets.forEach((socket) => {
+          if (socket === options.exclude) {
+            return;
+          }
+          emitTo(socket, type, payload);
+        });
+      };
+
+      const parseClientPayload = (raw) => {
+        if (typeof raw === 'string') {
+          try {
+            const json = JSON.parse(raw);
+            if (json && typeof json === 'object' && json.payload) {
+              return json.payload;
+            }
+            return json;
+          } catch {
+            return null;
+          }
+        }
+
+        if (raw == null) {
+          return null;
+        }
+
+        const decoder = window.__PW_DECODE_MSGPACK__;
+        if (typeof decoder === 'function' &&
+          (raw instanceof ArrayBuffer || ArrayBuffer.isView(raw) || raw instanceof Blob)) {
+          try {
+            if (raw instanceof Blob) {
+              return null;
+            }
+            const bytes = raw instanceof ArrayBuffer
+              ? new Uint8Array(raw)
+              : new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
+            const decoded = decoder(bytes);
+            if (decoded && typeof decoded === 'object' && decoded.payload) {
+              return decoded.payload;
+            }
+            return decoded;
+          } catch {
+            return null;
+          }
+        }
+
+        if (raw instanceof Blob) {
+          return null;
+        }
+
+        return null;
+      };
+
+      const sendStatusNotice = (socket, message) => {
+        emitTo(socket, 'status_notice', { message });
+      };
+
+      const handleClientMessage = (socket, raw) => {
+        const payload = parseClientPayload(raw);
+        if (!payload || typeof payload !== 'object') {
+          return;
+        }
+
+        const now = nowMs();
+        switch (payload.type) {
+          case 'ping':
+            emitTo(socket, 'pong', { timestamp: payload.timestamp ?? now });
+            break;
+
+          case 'player_sync': {
+            const nextPlayer = payload.player;
+            if (!nextPlayer || nextPlayer.id !== playerId) {
+              break;
+            }
+            const merged = state.players.get(playerId);
+            if (merged) {
+              state.players.set(playerId, {
+                ...merged,
+                ...nextPlayer,
+                velocity: nextPlayer.velocity ?? merged.velocity,
+              });
+            }
+            emitTo(socket, 'player_sync', { player: state.players.get(playerId) });
+            state.totalPlayTimeMs += 100;
+            emitTo(socket, 'piggy_coin_balance', {
+              balanceCents: state.piggyCoinBalanceCents,
+              deltaCents: 1,
+              totalPlayTimeMs: state.totalPlayTimeMs,
+              source: 'play_time',
+              sourceLabel: '探索時間',
+            });
+            break;
+          }
+
+        case 'block_set':
+        case 'block_mutate':
+        case 'block_mutation': {
+          const normalizedBlock = normalizeBlockMutation(payload.block);
+          if (!normalizedBlock) {
+            break;
+          }
+          emitTo(socket, 'block_changed', {
+            block: normalizedBlock,
+          });
+          if (!state.blocks) {
+            state.blocks = new Map();
+          }
+          state.blocks.set(
+            `${normalizedBlock.cell.x},${normalizedBlock.cell.y},${normalizedBlock.cell.z}`,
+            normalizedBlock,
+          );
+          emitTo(socket, 'status_notice', { message: `已同步方塊變更：${normalizedBlock.type ?? '空方塊'}` });
+          broadcast('monster_state', {
+            monsters: Object.values(state.monsters).map((monster) => ({
+              ...monster,
+              position: { ...monster.position },
+            })),
+          }, { exclude: socket });
+          break;
+          }
+
+          case 'chat_send': {
+            const text = toSafeText(payload.text, '').slice(0, 120);
+            if (!text) {
+              break;
+            }
+
+            const chatMessage = {
+              id: `chat-${playerId}-${nowMs()}`,
+              playerId,
+              playerName: state.players.get(playerId)?.name ?? resolved.name,
+              text,
+              sentAtMs: nowMs(),
+            };
+            broadcast('chat_message', { message: chatMessage });
+            break;
+          }
+
+          case 'equipment_action':
+            sendStatusNotice(socket, '設備互動已在本機模擬接收。');
+            break;
+
+          case 'monster_capture':
+          case 'player_hit': {
+            const monsterId = payload.monsterId || payload.targetMonsterId;
+            if (monsterId) {
+              const monster = state.monsters[monsterId];
+              if (monster) {
+                monster.health = Math.max(0, monster.health - 8);
+                if (monster.health <= 0) {
+                  monster.isTamed = true;
+                  state.inventory.monsterBallOrangeMushroom = (state.inventory.monsterBallOrangeMushroom ?? 0) + 1;
+                  emitTo(socket, 'monster_reward', {
+                    monsterKind: monster.kind,
+                    monsterLabel: monster.kind,
+                    drops: [{ itemId: `${monster.kind}Corpse`, amount: 1 }],
+                  });
+                }
+              }
+            }
+            emitTo(socket, 'monster_state', {
+              monsters: Object.values(state.monsters),
+            });
+            emitTo(socket, 'status_notice', { message: '已收到怪物互動。' });
+            break;
+          }
+
+          case 'monster_release':
+            if (payload.monsterKind) {
+              const releasedId = `monster-${payload.monsterKind}-${Date.now()}`;
+              state.monsters[releasedId] = {
+                id: releasedId,
+                kind: payload.monsterKind,
+                position: { ...(payload.targetCell || { x: 2, y: 7, z: 2 }) },
+                health: 24,
+                maxHealth: 24,
+                targetPlayerId: null,
+                isTamed: true,
+              };
+              emitTo(socket, 'monster_state', { monsters: Object.values(state.monsters) });
+              emitTo(socket, 'status_notice', { message: `已放出 ${payload.monsterKind}，開始巡邏。` });
+            } else {
+              sendStatusNotice(socket, '缺少要放出的怪物種類。');
+            }
+            break;
+
+          case 'shared_storage_interact':
+          case 'npc_interact':
+          case 'mailbox_post':
+            emitTo(socket, 'status_notice', { message: '該行為在單機版目前模擬成功。' });
+            break;
+
+          case 'shared_storage_deposit':
+          case 'shared_storage_withdraw':
+            sendStatusNotice(socket, '倉庫/道具互動已模擬完成。');
+            break;
+
+          case 'craft_item':
+            emitTo(socket, 'inventory_state', {
+              inventory: { ...state.inventory },
+              equipment: { ...state.equipment },
+            });
+            emitTo(socket, 'status_notice', { message: `製作指令已接收：${payload.recipeId ?? ''}` });
+            break;
+
+          case 'npc_shop_purchase':
+            sendStatusNotice(socket, `商店交易已模擬：${payload.offerId ?? '未知商品'}`);
+            break;
+
+          case 'player_social_action':
+          case 'social_action_response':
+          case 'social_action_cancel':
+          case 'trade_invite':
+          case 'trade_response':
+          case 'trade_set_offer':
+          case 'trade_set_locked':
+          case 'trade_confirm':
+          case 'trade_cancel':
+          case 'revive_player':
+          case 'admin_spawn_monster':
+          case 'voice_state':
+          case 'voice_signal':
+            sendStatusNotice(socket, `${payload.type} 已模擬接收。`);
+            break;
+
+          default:
+            sendStatusNotice(socket, `已接收客戶端指令：${payload.type}`);
+            break;
+        }
+      };
+
+      const tickMonster = (socket) => {
+        const now = nowMs();
+        let index = 0;
+        for (const monster of Object.values(state.monsters)) {
+          monster.position.x += index === 0 ? 0.02 : -0.01;
+          monster.position.z += index === 0 ? 0.015 : -0.012;
+          monster.health = clamp(monster.health + 0.001, 0, monster.maxHealth);
+          index += 1;
+        }
+
+        if (socket?.readyState === 1) {
+          emitTo(
+            socket,
+            'monster_state',
+            {
+              monsters: Object.values(state.monsters),
+            },
+          );
+        }
+
+        state.lastSnapshotAtMs = now;
+      };
+
+      const sendPeriodicUpdates = (socket) => {
+        if (!socket || socket.readyState !== 1) {
+          return;
+        }
+
+        const now = nowMs();
+        emitTo(socket, 'round_state', {
+          roundState: {
+            goalSeconds: 0,
+            serverNowMs: now,
+            roundStartedAtMs: state.lastSnapshotAtMs,
+            hazardStartsAtMs: state.lastSnapshotAtMs,
+            goalEndsAtMs: state.lastSnapshotAtMs + 20 * 60 * 1000,
+          },
+        });
+        emitTo(socket, 'day_night_state', {
+          dayNightState: {
+            cycleDurationMs: 240000,
+            cycleStartedAtMs: state.lastSnapshotAtMs,
+            serverNowMs: now,
+          },
+        });
+      };
+
       class MockXMLHttpRequest {
         constructor() {
           this.readyState = 0;
@@ -138,228 +733,6 @@
         }
       }
 
-      const decodeServerPayload = (raw) => {
-        if (typeof raw === 'string') {
-          try {
-            return JSON.parse(raw);
-          } catch {
-            return null;
-          }
-        }
-        try {
-          return {
-            v: 1,
-            payload: raw instanceof Blob
-              ? JSON.parse(raw)
-              : {
-                  type: 'unknown',
-                },
-          };
-        } catch {
-          return null;
-        }
-      };
-
-      const wrapPayload = (message) => ({
-        v: 1,
-        payload: message,
-      });
-
-      const nowMs = () => Date.now();
-      const clamp = (value, fallback = 0) => (Number.isFinite(value) ? value : fallback);
-      const basePlayer = {
-        position: { x: 0.5, y: 7.02, z: 0.5 },
-        velocity: { x: 0, y: 0, z: 0 },
-      };
-
-      const toWelcomeMessage = () => {
-        const now = nowMs();
-        const playerId = `p-${Math.abs(resolved.name.split('').reduce((sum, char) => sum + char.charCodeAt(0) * 31, 0)).toString(16)}`;
-        const nowPlayer = {
-          id: playerId,
-          name: resolved.name,
-          position: { ...basePlayer.position },
-          velocity: { ...basePlayer.velocity },
-          yaw: 0,
-          pitch: 0,
-          moveSpeed: 1,
-          attackPulse: 0,
-          health: 20,
-          maxHealth: 20,
-          cameraMode: 'first-person',
-          selectedSlot: 0,
-          deathCount: 0,
-          avatarStyleId: 'zhuda',
-          equipmentVisuals: {
-            weaponEquipmentId: null,
-            toolEquipmentId: null,
-            headEquipmentId: null,
-            bodyEquipmentId: null,
-            accessoryEquipmentId: null,
-          },
-          isDowned: false,
-          downedUntilMs: null,
-          isSleeping: false,
-          sleepingBedCell: null,
-        };
-
-        return wrapPayload({
-          type: 'welcome',
-          playerId,
-          players: [nowPlayer],
-          blockStates: [],
-          paintings: [],
-          screens: [],
-          propertyClaims: [],
-          worldSnapshotChunkCount: 0,
-          inventory: {
-            dirt: 120,
-            grass: 80,
-            stone: 80,
-            wood: 20,
-            plank: 30,
-            torch: 20,
-            water_bucket: 1,
-          },
-          equipment: {
-            pickaxeTier: 2,
-            spearTier: 1,
-            bagCapacity: 32,
-            bag: [],
-            equipped: {
-              weaponEquipmentId: null,
-              toolEquipmentId: null,
-              headEquipmentId: null,
-              bodyEquipmentId: null,
-              accessoryEquipmentId: null,
-            },
-          },
-          monsters: [
-            {
-              id: 'monster-orange-1',
-              kind: 'orange-mushroom',
-              position: { x: -16, y: 6, z: 4 },
-              health: 24,
-              maxHealth: 24,
-              targetPlayerId: null,
-              isTamed: false,
-            },
-          ],
-          npcs: [
-            {
-              id: 'npc-guide',
-              name: '村長',
-              kind: 'guide',
-              position: { x: 6.5, y: 7, z: 6.5 },
-              color: '#8ec6ff',
-              avatarStyleId: 'zhuer',
-            },
-          ],
-          onlineCount: 1,
-          roundState: {
-            goalSeconds: 0,
-            serverNowMs: now,
-            roundStartedAtMs: now,
-            hazardStartsAtMs: now,
-            goalEndsAtMs: now + clamp(20 * 60 * 1000),
-          },
-          dayNightState: {
-            cycleDurationMs: 240000,
-            cycleStartedAtMs: now,
-            serverNowMs: now,
-          },
-          teamState: {
-            onlineCount: 1,
-            roundPlayers: 1,
-            alivePlayers: 1,
-            flawless: true,
-          },
-          roomState: {
-            id: resolved.roomId,
-            title: '本地單機房',
-            mapId: resolved.mapId,
-            gameMode: 'survival',
-            theme: 'zhuda-zhuer',
-            maxPlayers: 16,
-            allowPlayerDamage: false,
-            onlineCount: 1,
-            isPermanent: true,
-            phase: 'open',
-            activeUntilMs: null,
-            closingAtMs: null,
-            serverNowMs: now,
-            joinPath: `/room.html?room=${encodeURIComponent(resolved.roomId)}`,
-          },
-          chatHistory: [
-            {
-              id: `welcome-${now}`,
-              playerId: 'system',
-              playerName: '系統',
-              text: '歡迎進入單機版，這是從後端快照模擬進來的遊戲。',
-              sentAtMs: now,
-            },
-          ],
-          voiceParticipantIds: [],
-          transportCapabilities: {
-            protocolVersion: 1,
-            sessionTransport: 'websocket-msgpack',
-            gameplay: {
-              reliableLane: 'websocket',
-              lowLatencyLane: 'none',
-              binaryEncoding: 'msgpack',
-            },
-            features: {
-              realtimeChat: true,
-              voiceSignaling: false,
-              voiceMedia: false,
-              gameplayDataChannel: false,
-            },
-          },
-          piggyCoinBalanceCents: 2000,
-          totalPlayTimeMs: 0,
-        });
-      };
-
-      const toPlayerHeartbeat = (messageType, index) => {
-        const now = nowMs();
-        const nowPlayer = {
-          id: `p-${Math.abs(resolved.name.split('').reduce((sum, char) => sum + char.charCodeAt(0) * 31, 0)).toString(16)}`,
-          name: resolved.name,
-          position: {
-            x: clamp(basePlayer.position.x + 0.03 * index, 0.5),
-            y: clamp(basePlayer.position.y, 7.02),
-            z: clamp(basePlayer.position.z + 0.03 * index, 0.5),
-          },
-          velocity: { ...basePlayer.velocity },
-          yaw: 0,
-          pitch: 0,
-          moveSpeed: 1,
-          attackPulse: 0,
-          health: 20,
-          maxHealth: 20,
-          cameraMode: 'first-person',
-          selectedSlot: 0,
-          deathCount: 0,
-          avatarStyleId: 'zhuda',
-          equipmentVisuals: {
-            weaponEquipmentId: null,
-            toolEquipmentId: null,
-            headEquipmentId: null,
-            bodyEquipmentId: null,
-            accessoryEquipmentId: null,
-          },
-          isDowned: false,
-          downedUntilMs: null,
-          isSleeping: false,
-          sleepingBedCell: null,
-        };
-
-        return {
-          type: messageType,
-          player: nowPlayer,
-        };
-      };
-
       class MockWebSocket {
         static CONNECTING = 0;
         static OPEN = 1;
@@ -382,27 +755,32 @@
           this._closeReason = '';
           this._closeCode = 1000;
           this._heartbeatCounter = 0;
+          this._tick = null;
+          this._statusTick = null;
 
           queueMicrotask(() => {
             this.readyState = MockWebSocket.OPEN;
+            state.sockets.add(this);
             this._fire('open', {});
-            const welcome = toWelcomeMessage();
-            this._fire('message', { data: JSON.stringify(welcome) });
+            emitTo(this, 'welcome', toWelcomeMessage());
 
             this._tick = window.setInterval(() => {
               if (this.readyState !== MockWebSocket.OPEN) {
                 return;
               }
+
               this._heartbeatCounter += 1;
               if (this._heartbeatCounter === 4) {
-                this._heartbeatCounter = 0;
-                const payload = wrapPayload({
-                  type: 'player_sync',
-                  player: toPlayerHeartbeat('player_sync', this._heartbeatCounter).player,
-                });
-                this._fire('message', { data: JSON.stringify(payload) });
+                tickMonster(this);
               }
             }, 1000);
+
+            this._statusTick = window.setInterval(() => {
+              if (this.readyState !== MockWebSocket.OPEN) {
+                return;
+              }
+              sendPeriodicUpdates(this);
+            }, 3000);
           });
         }
 
@@ -433,6 +811,7 @@
           if (typeof handler === 'function') {
             handler(event);
           }
+
           const handlers = this._listeners.get(type);
           if (!handlers) {
             return;
@@ -446,8 +825,7 @@
         }
 
         send(data) {
-          // 本地端上報訊息目前不影響畫面，保留以避免前端邏輯拋錯。
-          void decodeServerPayload(data);
+          handleClientMessage(this, data);
           return data;
         }
 
@@ -458,8 +836,12 @@
           this.readyState = MockWebSocket.CLOSING;
           this._closeCode = code;
           this._closeReason = reason;
+          state.sockets.delete(this);
           if (this._tick) {
             clearInterval(this._tick);
+          }
+          if (this._statusTick) {
+            clearInterval(this._statusTick);
           }
           this.readyState = MockWebSocket.CLOSED;
           this._fire('close', {});
@@ -470,6 +852,7 @@
       window.WebSocket = MockWebSocket;
     })();
   </script>
+
   <script type="module" crossorigin src="./assets/game-DEqRvBI0.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/vendor-three-v1hl5ewM.js">
   <link rel="modulepreload" crossorigin href="./assets/game-i18n-CJMGkwkY.js">
