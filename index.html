@@ -54,11 +54,19 @@
       z-index: 10;
       display: flex;
       justify-content: center;
+      align-items: center;
       gap: 10px;
-      padding: 12px;
+      padding: 12px 12px 16px;
       background: rgba(238, 241, 244, .86);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(23, 58, 83, .12);
+    }
+
+    .toolbar .game-entry-cta {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
     }
 
     .toolbar a {
@@ -75,6 +83,7 @@
       box-shadow: 0 10px 24px rgba(22, 39, 54, .15);
       overflow: hidden;
       padding: 0;
+      position: relative;
       transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
     }
 
@@ -86,12 +95,45 @@
       outline: none;
     }
 
+    .toolbar .game-pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(47, 99, 127, 0.22);
+      pointer-events: none;
+      animation: game-pulse-ring 2.2s infinite;
+    }
+
+    .toolbar a::before {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px solid rgba(47, 99, 127, 0.22);
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(230, 230, 230, 0.75) 50%, rgba(210, 210, 210, 0.55) 100%);
+      pointer-events: none;
+    }
+
+    .toolbar a:hover::before,
+    .toolbar a:focus-visible::before {
+      border-color: rgba(47, 99, 127, 0.45);
+    }
+
+    .toolbar .game-entry-wrap:hover .game-pulse,
+    .toolbar .game-entry-wrap:focus-visible .game-pulse {
+      animation-duration: 1.2s;
+    }
+
     .toolbar .game-entry {
-      width: 100%;
-      height: 100%;
+      width: calc(100% - 10px);
+      height: calc(100% - 10px);
       object-fit: cover;
       object-position: center;
       display: block;
+      border-radius: 50%;
+      margin: 5px;
+      position: relative;
+      z-index: 2;
     }
 
     .toolbar .game-entry-label {
@@ -110,6 +152,13 @@
       position: relative;
       width: 88px;
       height: 88px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #f3f3f3 60%, #dedede 100%);
+      text-decoration: none;
     }
 
     .toolbar .game-entry-wrap:hover {
@@ -130,15 +179,33 @@
       text-align: center;
       letter-spacing: .02em;
       pointer-events: none;
+      z-index: 3;
     }
 
-    .toolbar .game-entry-wrap {
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: radial-gradient(circle at 30% 30%, #ffffff, #f3f3f3 60%, #dedede 100%);
+    .toolbar .game-entry-badge {
+      background: #173a53;
+      color: #fff;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font: 700 12px/1.1 var(--font);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      box-shadow: 0 6px 14px rgba(22, 39, 54, .16);
+    }
+
+    @keyframes game-pulse-ring {
+      0% {
+        transform: scale(0.92);
+        opacity: .65;
+      }
+      72% {
+        transform: scale(1.2);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(0.92);
+        opacity: 0;
+      }
     }
 
     .sheet {
@@ -573,19 +640,23 @@
 </head>
 <body>
   <div class="toolbar" aria-label="Game entry">
-    <a
-      class="game-entry-wrap"
-      href="https://zhudaandzhuer.github.io/myGames/0001-PixelWorld/index.html"
-      target="_blank"
-      rel="noopener"
-      title="前往 PixelWorld 遊戲"
-      aria-label="前往 PixelWorld 遊戲">
-      <img
-        class="game-entry"
-        src="./myGames/0001-PixelWorld/images/zhuda-zhuer-favicon-256.png"
-        alt="">
-      <span class="game-entry-label">前往 PixelWorld 單機版</span>
-    </a>
+    <div class="game-entry-cta">
+      <a
+        class="game-entry-wrap"
+        href="https://zhudaandzhuer.github.io/myGames/0001-PixelWorld/index.html"
+        target="_blank"
+        rel="noopener"
+        title="前往 PixelWorld 單機版（作品展示）"
+        aria-label="前往 PixelWorld 單機版（作品展示）">
+        <span class="game-pulse" aria-hidden="true"></span>
+        <img
+          class="game-entry"
+          src="./myGames/0001-PixelWorld/images/zhuda-zhuer-favicon-256.png"
+          alt="PixelWorld 遊戲按鈕">
+        <span class="game-entry-label">前往 PixelWorld 單機版</span>
+      </a>
+      <span class="game-entry-badge">作品展示</span>
+    </div>
   </div>
 
   <main class="sheet">
