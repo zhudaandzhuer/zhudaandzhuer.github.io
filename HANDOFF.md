@@ -23,6 +23,19 @@
   as 「電通系 學士」; 淡江 years 2019–2021 came from the old page.
 - Not committed / not pushed yet.
 
+## Games pass (2026-11-13, later)
+- Shikaku + ChessLingo restyled to the homepage's paper/ink look (light + dark),
+  each with a "← 作品集" link back to the homepage. Game logic untouched.
+- ChessLingo: removed demo-only copy (「落地 Demo 規格」, event log panel,
+  investor line, "Demo 模式" toasts); fixed squashed empty rows on phones.
+- PixelWorld (`index.html` mock layer only, bundles untouched):
+  - Day/night was stuck at dawn (mock kept resetting `cycleStartedAtMs`);
+    now a fixed 20-min cycle that starts in daytime.
+  - Piggy coin balance never grew; now +1 per 10 s of play.
+  - Removed developer toasts ("已模擬接收" etc.), hid FPS/latency/room-count/mic.
+  - Social-button relocation script no longer re-scans every DOM attribute change.
+- Not done: PixelWorld loading screen still says 「連接伺服器」 (lives in the bundle).
+
 ## Local preview
 `python3 -m http.server <port>` from the repo root (port 8765 is used by another
 local app on this machine), then open http://127.0.0.1:<port>/.

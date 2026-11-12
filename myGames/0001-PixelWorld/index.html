@@ -33,6 +33,14 @@
     canvas {
       display: block;
     }
+
+    /* single-player build: hide network/debug-only HUD bits */
+    .hud-latency,
+    .hud-performance--fps,
+    .hud-room-meta,
+    .voice-toggle {
+      display: none !important;
+    }
   </style>
   <script>
     (() => {
@@ -95,6 +103,10 @@
 
       const nowMs = () => Date.now();
       const now = nowMs();
+      const DAY_CYCLE_MS = 20 * 60 * 1000;
+      const WORLD_STARTED_AT_MS = now;
+      const DAY_CYCLE_STARTED_AT_MS = now - DAY_CYCLE_MS * 0.3;
+      const ROUND_STARTED_AT_MS = now;
       const nowSec = () => Math.floor(nowMs() / 1000);
       const clamp = (value, min, max) => {
         if (!Number.isFinite(value)) {
@@ -134,7 +146,7 @@
 
       const roomState = {
         id: resolved.roomId,
-        title: '本地單機房',
+        title: '豬大基地',
         mapId: resolved.mapId,
         gameMode: 'survival',
         theme: 'zhuda-zhuer',
@@ -297,13 +309,13 @@
           roundState: {
             goalSeconds: 0,
             serverNowMs: now,
-            roundStartedAtMs: now,
-            hazardStartsAtMs: now,
-            goalEndsAtMs: now + 20 * 60 * 1000,
+            roundStartedAtMs: ROUND_STARTED_AT_MS,
+            hazardStartsAtMs: ROUND_STARTED_AT_MS,
+            goalEndsAtMs: ROUND_STARTED_AT_MS + 20 * 60 * 1000,
           },
           dayNightState: {
-            cycleDurationMs: 240000,
-            cycleStartedAtMs: now,
+            cycleDurationMs: DAY_CYCLE_MS,
+            cycleStartedAtMs: DAY_CYCLE_STARTED_AT_MS,
             serverNowMs: now,
           },
           teamState: {
@@ -318,7 +330,7 @@
               id: `welcome-${nowSec()}`,
               playerId: 'system',
               playerName: '系統',
-              text: '歡迎進入單機版，這是從後端快照模擬進來的遊戲。',
+              text: '歡迎來到豬大與豬二世界！這裡是單人模式，自由探索、蓋出你的小基地吧。',
               sentAtMs: now,
             },
           ],
@@ -452,14 +464,20 @@
               });
             }
             emitTo(socket, 'player_sync', { player: state.players.get(playerId) });
-            state.totalPlayTimeMs += 100;
-            emitTo(socket, 'piggy_coin_balance', {
-              balanceCents: state.piggyCoinBalanceCents,
-              deltaCents: 1,
-              totalPlayTimeMs: state.totalPlayTimeMs,
-              source: 'play_time',
-              sourceLabel: '探索時間',
-            });
+            state.totalPlayTimeMs = now - WORLD_STARTED_AT_MS;
+            const earnedCents = Math.floor(state.totalPlayTimeMs / 10000);
+            const deltaCents = earnedCents - (state.awardedCents ?? 0);
+            if (deltaCents > 0) {
+              state.awardedCents = earnedCents;
+              state.piggyCoinBalanceCents += deltaCents;
+              emitTo(socket, 'piggy_coin_balance', {
+                balanceCents: state.piggyCoinBalanceCents,
+                deltaCents,
+                totalPlayTimeMs: state.totalPlayTimeMs,
+                source: 'play_time',
+                sourceLabel: '探索時間',
+              });
+            }
             break;
           }
 
@@ -480,7 +498,6 @@
             `${normalizedBlock.cell.x},${normalizedBlock.cell.y},${normalizedBlock.cell.z}`,
             normalizedBlock,
           );
-          emitTo(socket, 'status_notice', { message: `已同步方塊變更：${normalizedBlock.type ?? '空方塊'}` });
           broadcast('monster_state', {
             monsters: Object.values(state.monsters).map((monster) => ({
               ...monster,
@@ -508,7 +525,6 @@
           }
 
           case 'equipment_action':
-            sendStatusNotice(socket, '設備互動已在本機模擬接收。');
             break;
 
           case 'monster_capture':
@@ -532,7 +548,6 @@
             emitTo(socket, 'monster_state', {
               monsters: Object.values(state.monsters),
             });
-            emitTo(socket, 'status_notice', { message: '已收到怪物互動。' });
             break;
           }
 
@@ -555,15 +570,15 @@
             }
             break;
 
-          case 'shared_storage_interact':
           case 'npc_interact':
-          case 'mailbox_post':
-            emitTo(socket, 'status_notice', { message: '該行為在單機版目前模擬成功。' });
+            sendStatusNotice(socket, '村長：歡迎來到豬大基地！四處逛逛，想蓋什麼就蓋吧。');
             break;
 
+          case 'shared_storage_interact':
+          case 'mailbox_post':
           case 'shared_storage_deposit':
           case 'shared_storage_withdraw':
-            sendStatusNotice(socket, '倉庫/道具互動已模擬完成。');
+            sendStatusNotice(socket, '倉庫與信箱要在多人房間才能使用。');
             break;
 
           case 'craft_item':
@@ -571,11 +586,11 @@
               inventory: { ...state.inventory },
               equipment: { ...state.equipment },
             });
-            emitTo(socket, 'status_notice', { message: `製作指令已接收：${payload.recipeId ?? ''}` });
+            sendStatusNotice(socket, '單人模式暫不開放製作。');
             break;
 
           case 'npc_shop_purchase':
-            sendStatusNotice(socket, `商店交易已模擬：${payload.offerId ?? '未知商品'}`);
+            sendStatusNotice(socket, '商店要在多人房間才能使用。');
             break;
 
           case 'player_social_action':
@@ -589,13 +604,12 @@
           case 'trade_cancel':
           case 'revive_player':
           case 'admin_spawn_monster':
-          case 'voice_state':
-          case 'voice_signal':
-            sendStatusNotice(socket, `${payload.type} 已模擬接收。`);
+            sendStatusNotice(socket, '這個功能要在多人房間才能使用。');
             break;
 
+          case 'voice_state':
+          case 'voice_signal':
           default:
-            sendStatusNotice(socket, `已接收客戶端指令：${payload.type}`);
             break;
         }
       };
@@ -633,15 +647,15 @@
           roundState: {
             goalSeconds: 0,
             serverNowMs: now,
-            roundStartedAtMs: state.lastSnapshotAtMs,
-            hazardStartsAtMs: state.lastSnapshotAtMs,
-            goalEndsAtMs: state.lastSnapshotAtMs + 20 * 60 * 1000,
+            roundStartedAtMs: ROUND_STARTED_AT_MS,
+            hazardStartsAtMs: ROUND_STARTED_AT_MS,
+            goalEndsAtMs: ROUND_STARTED_AT_MS + 20 * 60 * 1000,
           },
         });
         emitTo(socket, 'day_night_state', {
           dayNightState: {
-            cycleDurationMs: 240000,
-            cycleStartedAtMs: state.lastSnapshotAtMs,
+            cycleDurationMs: DAY_CYCLE_MS,
+            cycleStartedAtMs: DAY_CYCLE_STARTED_AT_MS,
             serverNowMs: now,
           },
         });
@@ -886,30 +900,32 @@
         allElements.forEach((el) => moveToBottomRight(el));
       };
 
-      const run = () => {
-        applyFix();
-        window.setTimeout(run, 600);
+      let scheduled = false;
+      const scheduleFix = () => {
+        if (scheduled) {
+          return;
+        }
+        scheduled = true;
+        window.requestAnimationFrame(() => {
+          scheduled = false;
+          applyFix();
+        });
       };
 
-      const observer = new MutationObserver(() => {
-        applyFix();
-      });
+      const observer = new MutationObserver(scheduleFix);
+      const startObserving = () => observer.observe(document.body, { childList: true, subtree: true });
 
       if (document.body) {
-        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        startObserving();
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-        });
+        window.addEventListener('DOMContentLoaded', startObserving);
       }
 
       window.addEventListener('load', applyFix);
-      window.addEventListener('orientationchange', () => {
-        applyFix();
-      });
+      window.addEventListener('orientationchange', applyFix);
+      window.addEventListener('resize', scheduleFix);
 
       applyFix();
-      run();
     })();
   </script>
 </body>
