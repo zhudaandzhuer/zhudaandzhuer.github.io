@@ -258,8 +258,13 @@
     .play { font-weight: 700; font-size: 14px; color: var(--accent); white-space: nowrap; }
     .play::after { content: " →"; transition: margin .2s; }
     .game:hover .play::after { margin-left: 4px; }
+    .sub-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin: 48px 0 20px; }
+    .sub-title { font-family: var(--serif); font-weight: 900; font-size: clamp(22px, 2.4vw, 26px); margin: 0; }
+    .games.shipped { grid-template-columns: repeat(3, 1fr); grid-template-rows: auto; }
+    .games.shipped .game-cover { aspect-ratio: 63 / 50; }
+    .games.shipped .play-badge { left: auto; right: 12px; bottom: 12px; font-size: 12px; padding: 5px 11px 5px 9px; }
     @media (max-width: 820px) {
-      .games { grid-template-columns: 1fr; }
+      .games, .games.shipped { grid-template-columns: 1fr; }
       .game.feature { grid-row: auto; }
       .game.feature .game-cover { min-height: 0; aspect-ratio: 4 / 3; flex: none; }
     }
@@ -549,7 +554,7 @@
         <div class="sec-head reveal">
           <span class="sec-no">00</span>
           <h2 class="sec-title">可以直接玩的作品</h2>
-          <p class="sec-sub">全部部署在 GitHub Pages，點開即玩</p>
+          <p class="sec-sub">GitHub Pages 作品與 itch.io 上架遊戲，點開即玩</p>
         </div>
         <div class="games">
           <a class="game feature reveal" href="./myGames/0001-PixelWorld/index.html" target="_blank" rel="noopener">
@@ -591,6 +596,58 @@
               <p class="game-desc">一題一題練國際象棋戰術：點選走子、分層提示、XP 與連勝，進度自動保存。</p>
               <div class="game-foot">
                 <div class="tags"><span class="tag">單檔 HTML</span><span class="tag">JavaScript</span></div>
+                <span class="play">開始遊玩</span>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="sub-head reveal">
+          <h3 class="sub-title">已上架的原創遊戲</h3>
+          <p class="sec-sub">「豬大與豬二」系列，公開發行於 itch.io，瀏覽器直接玩</p>
+        </div>
+        <div class="games shipped">
+          <a class="game reveal" href="https://zhudaandzhuer.itch.io/zhuda-rainy-night-murder" target="_blank" rel="noopener">
+            <div class="game-cover">
+              <img src="./assets/img/rainy-night-cover.jpg" alt="豬大－雨夜殺人事件封面：雨夜中的豬大偵探" width="630" height="500" loading="lazy">
+              <span class="play-badge">itch.io 上架中</span>
+            </div>
+            <div class="game-body">
+              <div class="game-meta"><span class="no">itch.io</span><span>推理解謎 · 約 10 分鐘</span></div>
+              <h3 class="game-title">豬大－雨夜殺人事件</h3>
+              <p class="game-desc">雨夜裡電台主持人倒地，節目卻還在播。扮演豬大偵探蒐證、問話、寫筆記，一夜之內破案；全角色配音。</p>
+              <div class="game-foot">
+                <div class="tags"><span class="tag">LayaAir</span><span class="tag">TypeScript</span><span class="tag">AI 配音</span></div>
+                <span class="play">開始遊玩</span>
+              </div>
+            </div>
+          </a>
+          <a class="game reveal" href="https://zhudaandzhuer.itch.io/zhuer-cant-sleep-counting-pigs" target="_blank" rel="noopener">
+            <div class="game-cover">
+              <img src="./assets/img/counting-pigs-cover.jpg" alt="豬二睡不著：數豬豬封面：小豬跳過柵欄" width="630" height="500" loading="lazy">
+              <span class="play-badge">itch.io 上架中</span>
+            </div>
+            <div class="game-body">
+              <div class="game-meta"><span class="no">itch.io</span><span>放置點擊</span></div>
+              <h3 class="game-title">豬二睡不著：數豬豬</h3>
+              <p class="game-desc">睡不著就數豬：把小豬趕進泥巴、看牠們跳過柵欄，穿越六個夢境數到十萬隻。支援手機觸控與繁簡英三語。</p>
+              <div class="game-foot">
+                <div class="tags"><span class="tag">LayaAir</span><span class="tag">TypeScript</span><span class="tag">i18n</span></div>
+                <span class="play">開始遊玩</span>
+              </div>
+            </div>
+          </a>
+          <a class="game reveal" href="https://zhudaandzhuer.itch.io/zhuer-fish-them-out" target="_blank" rel="noopener">
+            <div class="game-cover">
+              <img src="./assets/img/fish-them-out-cover.jpg" alt="豬二：打撈吧！封面：海上揮動竹竿救小豬" width="630" height="500" loading="lazy">
+              <span class="play-badge">itch.io 上架中</span>
+            </div>
+            <div class="game-body">
+              <div class="game-meta"><span class="no">itch.io</span><span>休閒動作</span></div>
+              <h3 class="game-title">豬二：打撈吧！</h3>
+              <p class="game-desc">小豬們掉進海裡了！揮動竹竿，趁牠們揮手求救時撈起來，放上救生筏。</p>
+              <div class="game-foot">
+                <div class="tags"><span class="tag">LayaAir</span><span class="tag">TypeScript</span></div>
                 <span class="play">開始遊玩</span>
               </div>
             </div>
